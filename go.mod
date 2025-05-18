@@ -3,7 +3,7 @@ module github.com/lylykin/tristan-backend
 go 1.24.3
 
 require (
-	github.com/carbon-a-rat/death-star-command-center v0.0.0-20250513203252-270efac1e94e
+	github.com/lylykin/TRISTAN v0.0.0-20250513203252-270efac1e94e
 	github.com/pocketbase/pocketbase v0.28.1
 )
 
