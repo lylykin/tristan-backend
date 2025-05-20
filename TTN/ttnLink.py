@@ -1,7 +1,7 @@
 # Requirement: package paho-mqtt // Terminal >> pip install paho-mqtt
 import base64
 from ttnClient import TTNClient
-from dotenv import load_dotenv
+from dotenv import load_dotenv, dotenv_values 
 import os
 
 
@@ -9,28 +9,32 @@ import os
 # Classe TTNDataHandler qui doit avoir une méthode on_ttn_message
 class TTNDataHandler:
 
-    # Constructeur : attributs et paramètres à adapter aux besoins de votre projet (connexion BD, etc.)
-    def __init__(self, parameter1, parameter2):
-        self.parameter1 = parameter1
+    # Constructeur :
+    #client : connextion à PocketBase
+    def __init__(self, client, parameter2):
+        self.client = client
         self.parameter2 = parameter2
 
     # Méthode appelée lorsque le client TTN reçoit un message
     def on_ttn_message(self, message):
         #print(f"[TTNDataHandler] Données reçues par le Handler: " + str(message))
-
+        
+        #voir si on a vraiment besion de l'id du device, mais je pense pas
         device_id = message['device_id']
         message_date = message['date']
         message_json = message['json']
 
-        aff_message_date = message_date.strftime("%d/%m/%Y %H:%M:%S (%Z%z)")
-        print()
-        print(f"[TTNDataHandler] {aff_message_date}: Message de {device_id} => " + str(message_json))
+        #aff_message_date = message_date.strftime("%d/%m/%Y %H:%M:%S (%Z%z)")
+        #print()
+        #print(f"[TTNDataHandler] {aff_message_date}: Message de {device_id} => " + str(message_json))
+        print(str(message_json))
 
         self.my_method(device_id, message_date, message_json)
         
     # Méthode(s) à adapter aux besoins de votre projet (requêtes SQL, etc.)
     def my_method(self, device_id, message_date, message_json):
-        print(f"[TTNDataHandler] Votre Méthode du TTNDataHandler... ['{self.parameter1}', '{self.parameter2}']")
+        pass
+        #print(f"[TTNDataHandler] Votre Méthode du TTNDataHandler... ['{self.parameter1}', '{self.parameter2}']")
 
 
 

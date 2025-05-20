@@ -24,6 +24,6 @@ class DataManager :
     def get_data(self, client, collection) :
         data = client.collections(collection).get_list({"sparkdata"})  
     
-    def create_collection(self, client, collection : str) :
+    def create_table(self, client, collection : str) :
         client.collections(collection).create()
         
