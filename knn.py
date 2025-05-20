@@ -2,7 +2,7 @@ from math import sqrt
 
 #what my knn class needs : 
 #in the 1st phatse, i'll need a KNN builder, and the the KNN indentification, based on Deborah's code
-
+# phase de test
 class KNN() : 
     data_test : list
 
