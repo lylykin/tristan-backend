@@ -1,25 +1,19 @@
-# Requirement: package paho-mqtt // Terminal >> pip install paho-mqtt
-import base64
-from ttnClient import TTNClient
-from dotenv import load_dotenv, dotenv_values 
-import os
-
-
+import json
+from pocketbase import PocketBase  # Client also works the same
 
 # Classe TTNDataHandler qui doit avoir une méthode on_ttn_message
 class TTNDataHandler:
-
-    # Constructeur :
-    #client : connextion à PocketBase
-    def __init__(self, client, parameter2):
+    client : PocketBase
+    
+    def __init__(self, client = PocketBase('http://127.0.0.1:8090') ):
         self.client = client
-        self.parameter2 = parameter2
+        #self.parameter2 = parameter2
 
     # Méthode appelée lorsque le client TTN reçoit un message
     def on_ttn_message(self, message):
         #print(f"[TTNDataHandler] Données reçues par le Handler: " + str(message))
         
-        #voir si on a vraiment besion de l'id du device, mais je pense pas
+        #voir si on a vraiment besion de l'id et de la date du  device, mais je pense pas
         device_id = message['device_id']
         message_date = message['date']
         message_json = message['json']
@@ -27,86 +21,57 @@ class TTNDataHandler:
         #aff_message_date = message_date.strftime("%d/%m/%Y %H:%M:%S (%Z%z)")
         #print()
         #print(f"[TTNDataHandler] {aff_message_date}: Message de {device_id} => " + str(message_json))
-        print(str(message_json))
+        print(message_json)
 
-        self.my_method(device_id, message_date, message_json)
+        self.my_method(device_id, json.__loader__(message_json))
         
-    # Méthode(s) à adapter aux besoins de votre projet (requêtes SQL, etc.)
-    def my_method(self, device_id, message_date, message_json):
-        pass
-        #print(f"[TTNDataHandler] Votre Méthode du TTNDataHandler... ['{self.parameter1}', '{self.parameter2}']")
+    #adding recieved data in pocketbase, for the 1st phase.
+    def add_data_in_pb(self, device_id, message_file : json.__loader__):
+        
+        #variables to adapt depending of the json build        
+        data_id = "a adapter à la gueule du json"
+        data_array = 'idem'
+        
+        #attention, les méthodes privées sont à adapter aussi
+        if data_id == 'correspond aux data du sparkfun' : 
+            self._add_sparkfun_data(data_array)
+        else :
+            self._add_gps_data(data_array)
+        
+        
+        #print(f"[TTNDataHandler] Votre Méthode du TTNDataHandler... ['{self.parameter1}', '{self.parameter2}']")*
+    def _add_sparkfun_data(self, data : list):
+        
+        self.client.collection("sparkfun").create(
+            { "column 1 ": "value"}
+            )
+        
+    def _add_gps_data(self, data : list):
+        
+        self.client.collection("gps").create(
+            { "column 1 ": "value"}
+            )
 
+#idée random : si ya plein de trucs associés au fichier json : passer des truces en arguments   
 
+# list and filter "example" collection records
+#result = client.collection("example").get_list(
+ #   1, 20, {"filter": 'status = true && created > "2022-08-01 10:00:00"'})
 
-print()
-print("*********************")
-print("** Début du script **")
-print("*********************")
-print()
+# create record and upload file to image field
 
-load_dotenv()
-
-
-# clé et id de l'application, dans un file env pour la sécurité
-ttn_application_id = os.getenv('TTN_API_APPLICATION_ID')
-ttn_api_key_secret = os.getenv('TTN_API_KEY_SECRET')
-
-
-# ** Paramètres du TTN Data Handler à adapter à votre projet **
-ttn_data_handler = TTNDataHandler('P2i-2 Test Value', 1234567890)
-
-# ** Choix de la connexion MQTT ou MQTTs **
-#ttn_ca_cert = None  # pour connexion MQTT simple
-ttn_ca_cert = './mqtt2-ca-cert.pem'  # pour connexion MQTTs avec certificat
-
-
-# ** Initialisation de la classe TTN Client **
-ttn_client = TTNClient(
-    "eu1.cloud.thethings.network",
-    ttn_application_id,
-    ttn_api_key_secret,
-    ttn_data_handler,
-    ca_cert=ttn_ca_cert
-)
-
-
-# ** Test d'envoi d'un message (downlink) **
-# print()
-# print("** Envoi d'un message de test")
-# payload = 'OK'
-# #payload = bytes(bytearray([ 0xAA, 0xBB ]))
-# webhook_id = 'cmu-p32'  # ID du Webhook TTN
-# target_device_id = 'node7'
-# ttn.webhook_send_downlink(webhook_id, target_device_id, payload)
-# exit()
-
-
-# ** Récupération des messages stockés (Message storage) **
-print()
-print("** Récupération des messages stockés (depuis 5 minutes)")
-ttn_client.storage_retrieve_messages(hours=0, minutes=5)  # Penser à activer le "Message storage" sur TTN
-
-
-# ** Connexion MQTT(s) + Abonnement aux devices **
-print()
-print("** Connexion MQTT @ TTN")
-ttn_client.mqtt_connect()  # Connect to TTN
-
-# ttn.mqtt_register_device("node16")
-# ttn.mqtt_register_device("node8")
-ttn_client.mqtt_register_devices(['node9', 'node7'])
-
-
-# ** Script en attente // Réception des Messages MQTT par le Handler **
-try:
-    print("[Attente au clavier]")
-    input("Appuyer 2 fois sur Entrée pour arrêter le script\n\n")
-except KeyboardInterrupt as ex:
-    print("[Attente interrompue]")
-
-
-# ** Déconnexion MQTT(s) **
-print("Déconnexion de MQTT @ TTN")
-ttn_client.mqtt_disconnect()
-
-print("** Fin du script **")
+#class DataManager : 
+#   data_array : list
+#   
+#   def __init__(self, data_array,client) :
+#       self.data_2_add = data_array
+#       self.client = client 
+#   
+#   #we'll see how the data will be organized in the array
+#
+#        
+#   def get_data(self, client, collection) :
+#       data = client.collections(collection).get_list({"sparkdata"})  
+#   
+#   def create_table(self, client, collection : str) :
+#       client.collections(collection).create()

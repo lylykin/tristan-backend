@@ -188,10 +188,13 @@ class TTNClient:
         api_url = f"https://{self.host}/api/v3/as/applications/{self.application_id}/webhooks/{webhook_id}/devices/{device_id}/down/{mode}"
         # print(api_url)
 
+        print(api_url)
         headers = {
             'Authorization': f"Bearer {self.application_access_key}",
             'Content-Type': 'application/json'
         }
+        
+        print(headers)
 
         ttn_frames = [
             {
