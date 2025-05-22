@@ -1,15 +1,12 @@
 from TTN.ttnLink import TTNDataHandler
 from TTN.ttnClient import TTNClient
-from pathlib import Path
 import base64
 from dotenv import load_dotenv 
 import os
-
-env_path = Path(__file__).resolve().parent.parent / "secret_dont_look_at_me.env"
-load_dotenv(dotenv_path=env_path, override=True)
+import paho.mqtt.client as mqtt
 
 # clé et id de l'application, dans un file env pour la sécurité
-
+load_dotenv(dotenv_path="secret_dont_look_at_me.env")
 ttn_application_id = os.getenv('TTN_APPLICATION_ID')
 ttn_api_key_secret = os.getenv('TTN_API_KEY_SECRET')
 
@@ -22,20 +19,23 @@ ttn_ca_cert = None  # pour connexion MQTT simple
 print("start")
 # ** Initialisation de la classe TTN Client **
 ttn_client = TTNClient(
-    "eu1.cloud.thethings.network",
+    "eu1.cloud.thethings.network:1883",
     ttn_application_id,
     ttn_api_key_secret,
     ttn_data_handler,
     ca_cert=ttn_ca_cert
 )
 
+ttn_client.mqtt_connect()
 
-# ttn_client.mqtt_connect()
+client = mqtt.Client()
+client.username_pw_set(ttn_application_id + "@ttn", ttn_api_key_secret)
+# client.tls_set(ca_certs=ca_cert) # (cas du MQTTS)
 
 # ** Récupération des messages stockés (Message storage) **
 print()
 print("** Récupération des messages stockés (depuis 5 minutes)")
-ttn_client.storage_retrieve_messages(hours=10, minutes=5)  # Penser à activer le "Message storage" sur TTN
+ttn_client.storage_retrieve_messages(minutes=5)  # Penser à activer le "Message storage" sur TTN
 
 
 # ** Connexion MQTT(s) + Abonnement aux devices **
@@ -61,3 +61,31 @@ print("Déconnexion de MQTT @ TTN")
 ttn_client.mqtt_disconnect()
 
 print("** Fin du script **")
+
+# Paramètres de connexion
+broker = "eu1.cloud.thethings.network"  # Adresse du broker MQTT (ou MQTTs)
+port = 1883
+topic = "#" # tous les topics
+
+def on_connect(client, userdata, flags, rc):
+    print("Connecté au serveur MQTT")
+    client.subscribe(topic)
+
+#def on_message(client, userdata, msg):
+#    print(f"Message reçu : {msg.topic} -> {msg.payload.decode()}")
+#
+
+#cas variable si on est en phase de construction de la bdd(1) ou de comparaison des data à la bdd(2)
+
+stage = 1
+
+if stage == 1:
+    client.on_connect = on_connect
+    client.on_message = ttn_data_handler.on_ttn_message_s1
+else : 
+    client.on_connect = on_connect
+    client.on_message = ttn_data_handler.data_handler.on_ttn_message_s2 #n'existe pas encore mais c'est pas la priorité
+
+
+client.connect(broker, port, 60)
+client.loop_forever()
