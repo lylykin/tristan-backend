@@ -1,5 +1,5 @@
-import json
 from pocketbase import PocketBase  # Client also works the same
+import datetime
 
 # Classe TTNDataHandler qui doit avoir une méthode on_ttn_message
 class TTNDataHandler:
@@ -10,68 +10,78 @@ class TTNDataHandler:
         #self.parameter2 = parameter2
 
     # Méthode appelée lorsque le client TTN reçoit un message
-    def on_ttn_message(self, message):
+    def on_ttn_message(self, message : dict):
         #print(f"[TTNDataHandler] Données reçues par le Handler: " + str(message))
         
         #voir si on a vraiment besion de l'id et de la date du  device, mais je pense pas
-        device_id = message['device_id']
-        message_date = message['date']
-        message_json = message['json']
+        #device_id = message['device_id']
+        message_date = message['time']
+        #message_json = message['json']
 
         #aff_message_date = message_date.strftime("%d/%m/%Y %H:%M:%S (%Z%z)")
-        #print()
-        #print(f"[TTNDataHandler] {aff_message_date}: Message de {device_id} => " + str(message_json))
-        print(message_json)
-
-        self.my_method(device_id, json.__loader__(message_json))
+        dico_payload = message['data']['uplink_message']['decoded_payload']
+        print(dico_payload)
         
-    #adding recieved data in pocketbase, for the 1st phase.
-    def add_data_in_pb(self, device_id, message_file : json.__loader__):
-        
-        #variables to adapt depending of the json build        
-        data_id = "a adapter à la gueule du json"
-        data_array = 'idem'
-        
-        #attention, les méthodes privées sont à adapter aussi
-        if data_id == 'correspond aux data du sparkfun' : 
-            self._add_sparkfun_data(data_array)
+        if list(dico_payload.keys())[0] == 'A' : 
+            self._add_sparkfun_data_s1(list(dico_payload.keys()), list(dico_payload.values()), message_date)
         else :
-            self._add_gps_data(data_array)
-        
+            self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()), message_date)        
         
         #print(f"[TTNDataHandler] Votre Méthode du TTNDataHandler... ['{self.parameter1}', '{self.parameter2}']")*
-    def _add_sparkfun_data(self, data : list):
+    def _add_sparkfun_data_s1(self, data_keys : list, data_values : list, message_date : str):
         
-        self.client.collection("sparkfun").create(
-            { "column 1 ": "value"}
+            self.client.collection("sparkfun").create(
+                {
+                 "datetime" : datetime.strftime(message_date, datetime),
+                 data_keys[0] : data_values[0],
+                 data_keys[1] : data_values[1],
+                 data_keys[2] : data_values[2],
+                 data_keys[3] : data_values[3],
+                 data_keys[4] : data_values[4],
+                 data_keys[5] : data_values[5],
+                 data_keys[6] : data_values[6],
+                 data_keys[7] : data_values[7],
+                 data_keys[8] : data_values[8],
+                 data_keys[9] : data_values[9],
+                 data_keys[10] : data_values[10],
+                 data_keys[11] : data_values[11],
+                 data_keys[12] : data_values[12],
+                 data_keys[13] : data_values[13],
+                 data_keys[14] : data_values[14],
+                 data_keys[15] : data_values[15],
+                 data_keys[16] : data_values[16],
+                 data_keys[17] : data_values[17],               
+                 }
             )
         
-    def _add_gps_data(self, data : list):
-        
+    def _add_gps_data(self, data_keys : list, data_values : list, message_date : str):
         self.client.collection("gps").create(
-            { "column 1 ": "value"}
-            )
+            {
+             "datetime" : datetime.strftime(message_date, datetime),
+             data_keys[0] : data_values[0],
+             data_keys[1] : data_values[1],
+             data_keys[2] : data_values[2],
+            }
+        )
+        
+    def on_ttn_connect_s2(self, message : dict) :
+        """
+        Non implémentée car pas la priorité pour l'instant
+        est techniquement la meme fonction que la version s1, mais vu que est utilisée en tant que callback, je suis obligée de faire comme ca
+        """
+        dico_payload = message['data']['uplink_message']['decoded_payload']
+        print(dico_payload)
+        
+        if list(dico_payload.keys())[0] == 'A' : 
+            self._spark_knn(list(dico_payload.keys()), list(dico_payload.values()))
+        else :
+            self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))   
+    
+    def _spark_knn(self, dico_data : dict) : 
+        """
+        doit retourner le matériau identifié par le knn
+        """
+        pass
+    
 
-#idée random : si ya plein de trucs associés au fichier json : passer des truces en arguments   
 
-# list and filter "example" collection records
-#result = client.collection("example").get_list(
- #   1, 20, {"filter": 'status = true && created > "2022-08-01 10:00:00"'})
-
-# create record and upload file to image field
-
-#class DataManager : 
-#   data_array : list
-#   
-#   def __init__(self, data_array,client) :
-#       self.data_2_add = data_array
-#       self.client = client 
-#   
-#   #we'll see how the data will be organized in the array
-#
-#        
-#   def get_data(self, client, collection) :
-#       data = client.collections(collection).get_list({"sparkdata"})  
-#   
-#   def create_table(self, client, collection : str) :
-#       client.collections(collection).create()
