@@ -10,7 +10,7 @@ class KNN() :
         self.knnData  = {}
         self.value = data_test
 
-    def knn(self, k = 7,) :        
+    def knn(self, k = 7) :        
         self.liste_vois  = self.plus_proche_voisins()
         return self.identification()
          
