@@ -1,5 +1,8 @@
 package main
 
+// go run main.go serve
+// Permet de lancer le fichier et donc le serveur
+
 import (
 	"log"
 	"os"

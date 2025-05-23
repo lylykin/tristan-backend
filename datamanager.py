@@ -1,5 +1,6 @@
 from TTN.ttnLink import TTNDataHandler
 from TTN.ttnClient import TTNClient
+#from subscribeData import PBdataListener
 import base64
 from dotenv import load_dotenv 
 import os
@@ -11,6 +12,10 @@ ttn_application_id = os.getenv('TTN_APPLICATION_ID')
 ttn_api_key_secret = os.getenv('TTN_API_KEY_SECRET')
 
 ttn_data_handler = TTNDataHandler()
+
+# Récupération de l'écoute de modification PocketBase
+#pb_data_listener = PBdataListener()
+#pb_data_listener.subscribe_sparkfun()
 
 # ** Choix de la connexion MQTT ou MQTTs **
 ttn_ca_cert = None  # pour connexion MQTT simple
