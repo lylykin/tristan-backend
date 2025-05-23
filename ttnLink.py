@@ -1,8 +1,8 @@
 from pocketbase import PocketBase  # Client also works the same
-import datetime
 import ast
 from dotenv import load_dotenv 
 import os
+from knn import KNN
 
 # Classe TTNDataHandler qui doit avoir une méthode on_ttn_message
 class TTNDataHandler:
@@ -28,15 +28,15 @@ class TTNDataHandler:
         #message_json = message['json']
 
         #aff_message_date = message_date.strftime("%d/%m/%Y %H:%M:%S (%Z%z)")
-        dico_payload = message['uplink_message']['decoded_payload']
-        print(dico_payload)
-        
-        if list(dico_payload.keys())[0] == 'A' : 
-            self._add_sparkfun_data_s1(list(dico_payload.keys()), list(dico_payload.values()))
-        else :
-            self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))        
-        
-        #print(f"[TTNDataHandler] Votre Méthode du TTNDataHandler... ['{self.parameter1}', '{self.parameter2}']")*
+        try : 
+            dico_payload = message['uplink_message']['decoded_payload']           
+            if list(dico_payload.keys())[0] == 'A' : 
+                self._add_sparkfun_data_s1(list(dico_payload.keys()), list(dico_payload.values()))
+            else :
+                self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values())) 
+        except : 
+            pass   
+
     def _add_sparkfun_data_s1(self, data_keys : list, data_values : list,):
         
             material = str(input("saisir le matériau du déchet : "))
@@ -90,7 +90,29 @@ class TTNDataHandler:
         """
         doit retourner le matériau identifié par le knn
         """
-        pass
+        data_list = list(dico_data.values())
+        #getting all the recyclable materials. might be a bit bruteforce but thats a first try
+        materials = self.client.collection("material").get_full_list(
+            {"filter": 'recyclable = true'})
+        print(materials)
+        data_test = self.client.collection("sparkfun").get_full_list()
+
+        #je ne sais pas quel type de data est renvoyé par ca 
+        #mais voila l'idée du truc, à adapter ensuite
+
+        ident = KNN(data_list)
+        #adding the data test to the knn.there might be a way to set it as default, so that it doesnt compute each time. but again its a first idea
+        ident.addKnnData(data_test)
+        id_material = ident.knn()
+        #for now it is a print. plus tard, l'ajouter dans l'historique de l'user, et le récupérer comme ca pour le frontend
+        print(id_material)
+
+
+test=  TTNDataHandler()
+data = {'uplink_message' : {'decoded_payload' : {'A' : 1, 'B' : 1, 'C' : 1}}}
+
+test.on_ttn_message_s2()
+        
     
 
 

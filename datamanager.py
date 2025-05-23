@@ -1,5 +1,5 @@
 from TTN.ttnLink import TTNDataHandler
-from TTN.ttnClient import TTNClient
+from ttnClient import TTNClient
 import base64
 from dotenv import load_dotenv 
 import os
