@@ -78,13 +78,16 @@ class TTNDataHandler:
         Non implémentée car pas la priorité pour l'instant
         est techniquement la meme fonction que la version s1, mais vu que est utilisée en tant que callback, je suis obligée de faire comme ca
         """
-        dico_payload = message['data']['uplink_message']['decoded_payload']
-        print(dico_payload)
-        
-        if list(dico_payload.keys())[0] == 'A' : 
-            self._spark_knn(list(dico_payload.keys()), list(dico_payload.values()))
-        else :
-            self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))   
+        try : 
+            dico_payload = message['data']['uplink_message']['decoded_payload']
+            print(dico_payload)
+
+            if list(dico_payload.keys())[0] == 'A' : 
+                self._spark_knn(list(dico_payload.keys()), list(dico_payload.values()))
+            else :
+                self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))
+        except : 
+            pass   
     
     def _spark_knn(self, dico_data : dict) : 
         """
@@ -96,19 +99,22 @@ class TTNDataHandler:
             {"filter": 'recyclable = true'})
         print(materials)
         data_test = self.client.collection("sparkfun").get_full_list()
+        print(data_test)
 
         #je ne sais pas quel type de data est renvoyé par ca 
         #mais voila l'idée du truc, à adapter ensuite
-
+        
         ident = KNN(data_list)
         #adding the data test to the knn.there might be a way to set it as default, so that it doesnt compute each time. but again its a first idea
         ident.addKnnData(data_test)
         id_material = ident.knn()
         #for now it is a print. plus tard, l'ajouter dans l'historique de l'user, et le récupérer comme ca pour le frontend
         print(id_material)
-
-
-        
     
-
-
+    def create_knn_data(self):
+        database = {}
+        data_as_coordinate = self.client.collection("sparkfun").get_full_list()
+        print(data_as_coordinate)
+        
+ttn_test_data_fetch = TTNDataHandler()
+ttn_test_data_fetch.create_knn_data()
