@@ -1,10 +1,7 @@
-from TTN.ttnLink import TTNDataHandler
-<<<<<<< HEAD
+from ttnLink import TTNDataHandler
 from ttnClient import TTNClient
-=======
-from TTN.ttnClient import TTNClient
+from ttnClient import TTNClient
 #from subscribeData import PBdataListener
->>>>>>> 2b559cd7efc26dc4669a536b194ee586694058bb
 import base64
 from dotenv import load_dotenv 
 import os
@@ -86,7 +83,7 @@ def on_connect(client, userdata, flags, rc):
 
 #cas variable si on est en phase de construction de la bdd(1) ou de comparaison des data à la bdd(2)
 
-stage = 1
+stage = 2
 
 if stage == 1:
     client.on_connect = on_connect

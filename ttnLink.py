@@ -108,10 +108,6 @@ class TTNDataHandler:
         print(id_material)
 
 
-test=  TTNDataHandler()
-data = {'uplink_message' : {'decoded_payload' : {'A' : 1, 'B' : 1, 'C' : 1}}}
-
-test.on_ttn_message_s2()
         
     
 
