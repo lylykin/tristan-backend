@@ -91,7 +91,7 @@ if stage == 1:
     #client.on_message = on_message  
 else : 
     client.on_connect = on_connect
-    client.on_message = ttn_data_handler.data_handler.on_ttn_message_s2 #n'existe pas encore mais c'est pas la priorité
+    client.on_message = ttn_data_handler.on_ttn_message_s2 #n'existe pas encore mais c'est pas la priorité
     #client.on_message = on_message
 
 
