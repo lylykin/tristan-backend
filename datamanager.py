@@ -83,7 +83,7 @@ def on_connect(client, userdata, flags, rc):
 
 #cas variable si on est en phase de construction de la bdd(1) ou de comparaison des data à la bdd(2)
 
-stage = 2
+stage = int(input("stage du projet"))
 
 if stage == 1:
     client.on_connect = on_connect

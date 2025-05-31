@@ -75,10 +75,10 @@ fruits = {
     (7, 6): 'pomme',
     (8, 4): 'pomme'}
 
-A = KNN((1,3))
-for val in fruits.items():
-    A.addKnnData(val[0], val[1])
-
-print(A.knn(k=2))
-
+#A = KNN((1,3))
+#for val in fruits.items():
+#    A.addKnnData(val[0], val[1])
+#
+#print(A.knn(k=2))
+#
 

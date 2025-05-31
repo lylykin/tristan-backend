@@ -21,13 +21,6 @@ class TTNDataHandler:
         message = ast.literal_eval(msg.payload.decode())
         print(message)
         
-        
-        #voir si on a vraiment besion de l'id et de la date du  device, mais je pense pas
-        #device_id = message['device_id']
-        # message_date = message['time']
-        #message_json = message['json']
-
-        #aff_message_date = message_date.strftime("%d/%m/%Y %H:%M:%S (%Z%z)")
         try : 
             dico_payload = message['uplink_message']['decoded_payload']           
             if list(dico_payload.keys())[0] == 'A' : 
@@ -73,42 +66,64 @@ class TTNDataHandler:
                 }
             )
         
-    def on_ttn_message_s2(self, message : dict) :
-        """
-        Non implémentée car pas la priorité pour l'instant
-        est techniquement la meme fonction que la version s1, mais vu que est utilisée en tant que callback, je suis obligée de faire comme ca
-        """
-        dico_payload = message['data']['uplink_message']['decoded_payload']
-        print(dico_payload)
+    def on_ttn_message_s2(self, client, userdata, msg) :
         
-        if list(dico_payload.keys())[0] == 'A' : 
-            self._spark_knn(list(dico_payload.keys()), list(dico_payload.values()))
-        else :
-            self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))   
-    
+        #le try except sert à la gestion des erreurs. Si                                                                                                                                                                                                                                                         
+        try : 
+            dico_payload = msg['data']['uplink_message']['decoded_payload']
+            print(dico_payload)
+
+            if list(dico_payload.keys())[0] == 'A' : 
+                self._spark_knn(list(dico_payload.keys()), list(dico_payload.values()))
+            else :
+                self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))   
+        except :
+            pass 
+        
+    def decode(self, val):
+        
+        if val.expand == {}: 
+            return val  
+        val.material = val.expand['material']
+        return val 
+         
     def _spark_knn(self, dico_data : dict) : 
         """
         doit retourner le matériau identifié par le knn
         """
         data_list = list(dico_data.values())
-        #getting all the recyclable materials. might be a bit bruteforce but thats a first try
-        materials = self.client.collection("material").get_full_list(
-            {"filter": 'recyclable = true'})
+        #récupération des records en brut
+        materials = self.client.collection("sparkfun").get_full_list(100,
+            {"expand": 'material'})
+        
+        pb_data = []
+        for mat in materials: 
+            pb_data.append(self.decode(mat).l)
+            
+
+                
         print(materials)
-        data_test = self.client.collection("sparkfun").get_full_list()
-
-        #je ne sais pas quel type de data est renvoyé par ca 
-        #mais voila l'idée du truc, à adapter ensuite
-
+        #identification
+        print("Identification du matériau en cours")
         ident = KNN(data_list)
-        #adding the data test to the knn.there might be a way to set it as default, so that it doesnt compute each time. but again its a first idea
-        ident.addKnnData(data_test)
+        ident.addKnnData(pb_data,)
         id_material = ident.knn()
         #for now it is a print. plus tard, l'ajouter dans l'historique de l'user, et le récupérer comme ca pour le frontend
-        print(id_material)
+        print(f"ifentificaation terminée. le matériau est : {id_material}")
+        return (id_material, self.is_recyclable(id_material))
 
-
+    def is_recyclable(self, mat) : 
+        """"
+        returns if a material is recyclable or not
+        """
+        if mat.material != "":
+            return mat.material.recyclabilite
+        else : 
+            return "Erreur : matériau non présent dans la base de donnée"
         
+obj = TTNDataHandler()
+obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  
+#obj._add_sparkfun_data_s1( ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T','U', 'V', 'W'], [0 for i in range (18)])  
     
 
 
