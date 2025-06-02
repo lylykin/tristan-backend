@@ -106,7 +106,7 @@ class TTNDataHandler:
         #identification
         print("Identification du matériau en cours")
         ident = KNN(data_list)
-        ident.addKnnData(pb_data,)
+        ident.addKnnData(pb_data, None)
         id_material = ident.knn()
         #for now it is a print. plus tard, l'ajouter dans l'historique de l'user, et le récupérer comme ca pour le frontend
         print(f"ifentificaation terminée. le matériau est : {id_material}")
