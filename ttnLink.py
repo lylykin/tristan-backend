@@ -31,40 +31,72 @@ class TTNDataHandler:
             pass   
 
     def _add_sparkfun_data_s1(self, data_keys : list, data_values : list,):
-        
-            material = str(input("saisir le matériau du déchet : "))
+
+            # On demande les informations lors du remplissage de la bdd
+            material_input = str(input("saisir le matériau du déchet : "))
+            objet_input = str(input("saisir l'objet associé au déchet : "))
+            borne_input = "h6h259zvkm8a53x" # On suppose que la borne utilisée sera la seule existante
+            user_id_input = os.getenv('SUPER_ID') # On suppose que le seul superuser rentre les data
+
+            materials_list = self.client.collection("materiau").get_full_list()
+            contained = False # Tiens compte si le matériau est dans la bdd
+            for mat in materials_list :
+                if material_input == mat['nom_materiau'] : # On suppose que les nom_materiau sont uniques pour chaque materiau
+                    material_id = mat['id']
+                    contained = True
+            if not contained : # Si le matériau entré n'existe pas dans la bdd, l'ajouter
+                self.client.collection("materiau").create(
+                    {
+                    'nom_materiau' : material_input,
+                    'recyclabilite' : str(input("saisir la recyclabilite du materiau (True/False) : ")),
+                    }
+                )
+            material = material_input
+
+            objets_list = self.client.collection("objet").get_full_list()
+            if objet_input not in objets_list : # Si l'objet entré n'existe pas dans la bdd, l'ajouter
+                self.client.collection("objet").create(
+                    {
+                    'nom_objet' : objet_input,
+                    'user' : user_id_input,
+                    'materiau' : material_id,
+                    }
+                )
+            objet = objet_input
+
         
             self.client.collection("sparkfun").create(
                 {
                 'material' : material,
-                 data_keys[0] : data_values[0],
-                 data_keys[1] : data_values[1],
-                 data_keys[2] : data_values[2],
-                 data_keys[3] : data_values[3],
-                 data_keys[4] : data_values[4],
-                 data_keys[5] : data_values[5],
-                 data_keys[6] : data_values[6],
-                 data_keys[7] : data_values[7],
-                 data_keys[8] : data_values[8],
-                 data_keys[9] : data_values[9],
-                 data_keys[10] : data_values[10],
-                 data_keys[11] : data_values[11],
-                 data_keys[12] : data_values[12],
-                 data_keys[13] : data_values[13],
-                 data_keys[14] : data_values[14],
-                 data_keys[15] : data_values[15],
-                 data_keys[16] : data_values[16],
-                 data_keys[17] : data_values[17],               
+                'borne' : borne_input,
+                'objet' : objet,
+                 data_keys[0] : data_values[0], # A
+                 data_keys[1] : data_values[1], # B
+                 data_keys[2] : data_values[2], # C
+                 data_keys[3] : data_values[3], # D
+                 data_keys[4] : data_values[4], # E
+                 data_keys[5] : data_values[5], # F
+                 data_keys[6] : data_values[6], # G
+                 data_keys[7] : data_values[7], # H
+                 data_keys[8] : data_values[8], # I
+                 data_keys[9] : data_values[9], # J
+                 data_keys[10] : data_values[10], # k
+                 data_keys[11] : data_values[11], # L
+                 data_keys[12] : data_values[12], # R
+                 data_keys[13] : data_values[13], # S
+                 data_keys[14] : data_values[14], # T
+                 data_keys[15] : data_values[15], # U
+                 data_keys[16] : data_values[16], # V
+                 data_keys[17] : data_values[17], # W               
                  }
             )
         
     def _add_gps_data(self, data_keys : list, data_values : list):
-        self.client.collection("gps").create(
-            {data_keys[0] : data_values[0],
-             data_keys[1] : data_values[1],
-             data_keys[2] : data_values[2],
-                }
-            )
+        self.client.collection("borne").update(
+            {'lat_actuel' : data_values[1], # lat
+             'long_actuel' : data_values[2], # longitude
+            }
+        )
         
     def on_ttn_message_s2(self, client, userdata, msg) :
         
