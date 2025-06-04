@@ -235,14 +235,11 @@ class TTNDataHandler:
             materials_data.append(mat.material)    
             #materials_data.append(self.decode(mat).material)
         print(f'pb_data : {materials_data}')
-
-            
-
                 
         #print(materials)
         #identification
         print("Identification du matériau en cours")
-        ident = KNN(data_list)
+        ident = KNN(data_list, pb_data)
 
         #ident.addKnnData(pb_data, None)
         id_material = ident.knn()
