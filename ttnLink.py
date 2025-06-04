@@ -109,7 +109,7 @@ class TTNDataHandler:
                 self._spark_knn(dico_payload)
                 
             else :
-                self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))   
+                self._add_gps_data(dico_payload)+3   
         except :
             print('bouhouhouuu')
             pass 
@@ -195,19 +195,29 @@ class TTNDataHandler:
         """
         data_list = list(dico_data.values())
         print(f'liste des données : {data_list}')
-        #récupération des records en brut
+        #récupération des records en brut des matériaux
+        #pb : je m'attends à une jointure, alors que j'ai
+        #l'impression que seuls l'attribut materials est renvoyé wtff
         materials = self.client.collection("sparkfun").get_full_list(100,
-            {"expand": 'material'})
+         {"expand": 'material'})
+        
+        #deuxième requete parce que wtfff
+        spark_data = self.client.collection("sparkfun").get_full_list(100)
         
         #si j'ai bien compris, val est à 0 quand ya rien
-        pb_data = []
+        #mais ne dervait pas arriver dans notre cas
+
+        #formattage des données materials
+        materials_data = []
         for mat in materials: 
-            pb_data.append(self.decode(mat).l)
-        print(f'pb_data : {pb_data}')
+            #heu pourquoi l???
+            materials_data.append(self.decode(mat.l))
+        print(f'pb_data : {materials_data}')
+
             
 
                 
-        print(materials)
+        #print(materials)
         #identification
         print("Identification du matériau en cours")
         ident = KNN(data_list)
@@ -227,8 +237,8 @@ class TTNDataHandler:
         else : 
             return "Erreur : matériau non présent dans la base de donnée"
         
-#obj = TTNDataHandler()
-#obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  
+obj = TTNDataHandler()
+obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  
 #obj._add_sparkfun_data_s1( ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T','U', 'V', 'W'], [0 for i in range (18)])  
     
 
