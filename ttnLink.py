@@ -38,9 +38,9 @@ class TTNDataHandler:
         """
         # On demande les informations lors du remplissage de la bdd
         material_input = str(input("saisir le matériau du déchet : "))
-        material_id = self.get_material_id(material_input)
+        material_id = self.add_material_if_needed(material_input)
         
-        print("insertion en cours...")
+        print("Phase 1 : Insertion en cours...")
         
         data_dict = {
         'material' : material_input,
@@ -64,28 +64,28 @@ class TTNDataHandler:
         data_keys[17] : data_values[17], # W               
         }
         print(data_dict)
-        self.client.collection("sparkfun").create()
+        self.client.collection("sparkfun").create(data_dict)
     
-    def get_material_id(self, material_input):
+    def add_material_if_needed(self, material_input):
         """
-        Récupère les matériaux présents dans la bdd et teste si le nom de matériau en paramètre 
+        Récupère les matériaux présents dans la bdd et teste si le nom de matériau en paramètre existe
         Récupère l'identifiant si le matériau existe déjà et sinon crée la ligne en demandant la recyclabilité
         renvoie l'id du matériau inséré/entré
         """
         materials_list = self.client.collection("materiau").get_full_list()
         contained = False # Tiens compte si le matériau est dans la bdd
         for mat in materials_list :
-            if material_input == mat['nom_materiau'] : # On suppose que les nom_materiau sont uniques pour chaque materiau
+            if material_input == mat['id'] : # On suppose que les id ou nom de materiaux sont uniques pour chaque materiau
                 material_id = mat['id']
                 contained = True
         if not contained : # Si le matériau entré n'existe pas dans la bdd, l'ajouter
             self.client.collection("materiau").create(
                 {
-                'nom_materiau' : material_input,
+                'id' : material_input,
                 'recyclabilite' : str(input("saisir la recyclabilite du materiau (True/False) : ")),
                 }
             )
-            material_id = self.client.collection("materiau").get_full_list(batch=1)['id'] # Récupère l'id du dernier matériau inséré (voire ci-dessus)
+            material_id = material_input #self.client.collection("materiau").get_full_list(batch=1)['id'] # Récupère l'id du dernier matériau inséré (voire ci-dessus)
         return material_id
     
     def _add_gps_data(self, data_keys : list, data_values : list):
@@ -123,28 +123,17 @@ class TTNDataHandler:
         """
         # On demande les informations lors du remplissage de la bdd
         material_input = str(input("saisir le matériau du déchet : "))
-        material_id = self.get_material_id(material_input)
+        material_id = self.add_material_if_needed(material_input)
         objet_input = str(input("saisir l'objet associé au déchet : "))
-        borne_input = "h6h259zvkm8a53x" # On suppose que la borne utilisée sera la seule existante
+        borne_input = "tristan1" # On suppose que la borne utilisée sera la seule existante
         user_id_input = os.getenv('SUPER_ID') # On suppose que le seul superuser rentre les data
-
-            #objets_list = self.client.collection("objet").get_full_list()
-            #if objet_input not in objets_list : # Si l'objet entré n'existe pas dans la bdd, l'ajouter
-            #    self.client.collection("objet").create(
-            #        {
-            #        'nom_objet' : objet_input,
-            #        'user' : user_id_input,
-            #        'materiau' : material_id,
-            #        }
-            #    )
-            #objet = objet_input
-
-            #'borne' : borne_input,
-            #'objet' : objet,
+        objet_id = self.add_object_if_needed(objet_input, material_id, user_id_input)
         
-        print("insertion en cours...")
+        print("Phase 2 : Insertion en cours...")
         
         data_dict = {
+        'borne' : borne_input,
+        'objet' : objet_id,
         'material' : material_input,
         data_keys[0] : data_values[0], # A
         data_keys[1] : data_values[1], # B
@@ -166,7 +155,31 @@ class TTNDataHandler:
         data_keys[17] : data_values[17], # W               
         }
         print(data_dict)
-        self.client.collection("sparkfun").create()
+        self.client.collection("sparkfun").create(data_dict)
+        
+    def add_object_if_needed(self, objet_input, material_id, user_id_input):
+        """
+        Récupère les objets présents dans la bdd pour l'utilisateur et teste si le nom de l'objet en paramètre existe
+        Se termine si l'objet existe déjà et sinon crée la ligne en récupérant le matériau et l'utilisateur en paramètre
+        Récupère l'id de l'objet ajouté/entré
+        """
+        objets_list = self.client.collection("objet").get_full_list(
+            {filter: f'user == {user_id_input}'}
+        )
+        contained = False # Tiens compte si le matériau est dans la bdd
+        for obj in objets_list :
+            if objet_input == obj['nom_objet'] : # On suppose que les id ou nom de materiaux sont uniques pour chaque materiau
+                objet_id = obj['id']
+                contained = True
+        if not contained : # Si l'objet entré n'existe pas dans la bdd, l'ajouter
+            self.client.collection("objet").create(
+                {
+                'id' : objet_input,
+                'user' : user_id_input,
+                'materiau' : material_id,
+                }
+            )
+        return objet_id
         
     def decode(self, val):
         #a check : je ne suis pas sure que marche finalement, mais voir pourquoi???
