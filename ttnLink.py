@@ -119,22 +119,22 @@ class TTNDataHandler:
         """
         Pour la phase d'identification (2), appelée à la réception de donnée
         data_keys étant le nom des attributs du payload et data_values les valeurs associées
-        WIP DOCSTRING EXPLAIN METHOD GOAL
+        Récupère le matériau et le nom de l'objet inséré, le nom de la borne, et le nom de l'user
+        Ajoute les informations à la database suivant data_keys et data_values
         """
         # On demande les informations lors du remplissage de la bdd
-        material_input = str(input("saisir le matériau du déchet : "))
-        material_id = self.add_material_if_needed(material_input)
+        #material_input = str(input("saisir le matériau du déchet : "))
+        #material_id = self.add_material_if_needed(material_input)
         objet_input = str(input("saisir l'objet associé au déchet : "))
         borne_input = "tristan1" # On suppose que la borne utilisée sera la seule existante
         user_id_input = os.getenv('SUPER_ID') # On suppose que le seul superuser rentre les data
-        objet_id = self.add_object_if_needed(objet_input, material_id, user_id_input)
+        objet_id = self.add_object(objet_input, user_id_input)
         
         print("Phase 2 : Insertion en cours...")
         
         data_dict = {
         'borne' : borne_input,
         'objet' : objet_id,
-        'material' : material_input,
         data_keys[0] : data_values[0], # A
         data_keys[1] : data_values[1], # B
         data_keys[2] : data_values[2], # C
@@ -157,7 +157,7 @@ class TTNDataHandler:
         print(data_dict)
         self.client.collection("sparkfun").create(data_dict)
         
-    def add_object_if_needed(self, objet_input, material_id, user_id_input):
+    def add_object(self, objet_input, user_id_input):
         """
         Récupère les objets présents dans la bdd pour l'utilisateur et teste si le nom de l'objet en paramètre existe
         Se termine si l'objet existe déjà et sinon crée la ligne en récupérant le matériau et l'utilisateur en paramètre
@@ -176,10 +176,29 @@ class TTNDataHandler:
                 {
                 'id' : objet_input,
                 'user' : user_id_input,
-                'materiau' : material_id,
                 }
             )
         return objet_id
+    
+    def update_knn_found_material(self, objet_id, material_id):
+        """
+        Modifie les collections objet et sparkfun pour leur associer le matériau détecté par le knn
+        (à chaque mesure associé à l'objet inséré par l'utilisateur)
+        """
+        self.client.collection("objet").update(objet_id,
+                {
+                'material' : material_id,
+                }
+            )
+        mesures_list = self.client.collection("sparkfun").get_full_list(
+            {filter: f'objet == {objet_id}'}
+        )
+        for mesure in mesures_list:
+            self.client.collection("sparkfun").update(mesure['id'],
+                    {
+                    'material' : material_id,
+                    }
+                )
         
     def decode(self, val):
         #a check : je ne suis pas sure que marche finalement, mais voir pourquoi???
@@ -211,7 +230,7 @@ class TTNDataHandler:
         materials_data = []
         for mat in materials: 
             #heu pourquoi l???
-            materials_data.append(self.decode(mat.l))
+            materials_data.append(self.decode(mat.material))
         print(f'pb_data : {materials_data}')
 
             
@@ -222,7 +241,7 @@ class TTNDataHandler:
         print("Identification du matériau en cours")
         ident = KNN(data_list)
 
-        ident.addKnnData(pb_data, None)
+        #ident.addKnnData(pb_data, None)
         id_material = ident.knn()
         #for now it is a print. plus tard, l'ajouter dans l'historique de l'user, et le récupérer comme ca pour le frontend
         print(f"ifentificaation terminée. le matériau est : {id_material}")
