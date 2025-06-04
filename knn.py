@@ -15,12 +15,13 @@ class KNN() :
         return self.identification()
          
 
-    def addKnnData(self, elt : list, name : str):
+    def addKnnData(self, elt_list : list, name_list : str):
         """
         adds a list of points into the KNN test data.
         elt : array of the data we want to add
         """ 
-        self.knnData[elt] = name 
+        for elt, name in elt_list, name_list : 
+            self.knnData[elt] = name 
 
 
     def plus_proche_voisins(self, k : int = 7):
