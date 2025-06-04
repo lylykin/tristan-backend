@@ -21,9 +21,9 @@ class KNN() :
         adds a list of points into the KNN test data.
         elt : array of the data we want to add
         """ 
-        for elt, name in elt_list, name_list : 
-            self.knnData[elt] = name 
-
+        #for elt, name in elt_list, name_list : 
+        #    self.knnData[elt] = name 
+        pass
 
     def plus_proche_voisins(self, k : int = 7):
         """

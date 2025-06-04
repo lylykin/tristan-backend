@@ -31,67 +31,63 @@ class TTNDataHandler:
             pass   
 
     def _add_sparkfun_data_s1(self, data_keys : list, data_values : list,):
-
-            # On demande les informations lors du remplissage de la bdd
-            material_input = str(input("saisir le matériau du déchet : "))
-            #objet_input = str(input("saisir l'objet associé au déchet : "))
-            #borne_input = "h6h259zvkm8a53x" # On suppose que la borne utilisée sera la seule existante
-            #user_id_input = os.getenv('SUPER_ID') # On suppose que le seul superuser rentre les data
-
-            #materials_list = self.client.collection("materiau").get_full_list()
-            #contained = False # Tiens compte si le matériau est dans la bdd
-            #for mat in materials_list :
-            #    if material_input == mat['nom_materiau'] : # On suppose que les nom_materiau sont uniques pour chaque materiau
-            #        material_id = mat['id']
-            #        contained = True
-            #if not contained : # Si le matériau entré n'existe pas dans la bdd, l'ajouter
-            #    self.client.collection("materiau").create(
-            #        {
-            #        'nom_materiau' : material_input,
-            #        'recyclabilite' : str(input("saisir la recyclabilite du materiau (True/False) : ")),
-            #        }
-            #    )
-            #material = material_input
-#
-            #objets_list = self.client.collection("objet").get_full_list()
-            #if objet_input not in objets_list : # Si l'objet entré n'existe pas dans la bdd, l'ajouter
-            #    self.client.collection("objet").create(
-            #        {
-            #        'nom_objet' : objet_input,
-            #        'user' : user_id_input,
-            #        'materiau' : material_id,
-            #        }
-            #    )
-            #objet = objet_input
-#
+        """
+        Pour la phase d'insertion (1), appelée à la réception de donnée
+        data_keys étant le nom des attributs du payload et data_values les valeurs associées
+        On demande le matériau associé à la mesure, traite sa création si besoin et on ajoute les valeurs aux attributs de sparkfun
+        """
+        # On demande les informations lors du remplissage de la bdd
+        material_input = str(input("saisir le matériau du déchet : "))
+        material_id = self.get_material_id(material_input)
         
-            #'borne' : borne_input,
-            #'objet' : objet,
-            print("insertion en cours...")
-            
-            data_dict = {'material' : material_input,
-            data_keys[0] : data_values[0], # A
-            data_keys[1] : data_values[1], # B
-            data_keys[2] : data_values[2], # C
-            data_keys[3] : data_values[3], # D
-            data_keys[4] : data_values[4], # E
-            data_keys[5] : data_values[5], # F
-            data_keys[6] : data_values[6], # G
-            data_keys[7] : data_values[7], # H
-            data_keys[8] : data_values[8], # I
-            data_keys[9] : data_values[9], # J
-            data_keys[10] : data_values[10], # k
-            data_keys[11] : data_values[11], # L
-            data_keys[12] : data_values[12], # R
-            data_keys[13] : data_values[13], # S
-            data_keys[14] : data_values[14], # T
-            data_keys[15] : data_values[15], # U
-            data_keys[16] : data_values[16], # V
-            data_keys[17] : data_values[17], # W               
-            }
-            print(data_dict)
-            self.client.collection("sparkfun").create()
+        print("insertion en cours...")
         
+        data_dict = {
+        'material' : material_input,
+        data_keys[0] : data_values[0], # A
+        data_keys[1] : data_values[1], # B
+        data_keys[2] : data_values[2], # C
+        data_keys[3] : data_values[3], # D
+        data_keys[4] : data_values[4], # E
+        data_keys[5] : data_values[5], # F
+        data_keys[6] : data_values[6], # G
+        data_keys[7] : data_values[7], # H
+        data_keys[8] : data_values[8], # I
+        data_keys[9] : data_values[9], # J
+        data_keys[10] : data_values[10], # k
+        data_keys[11] : data_values[11], # L
+        data_keys[12] : data_values[12], # R
+        data_keys[13] : data_values[13], # S
+        data_keys[14] : data_values[14], # T
+        data_keys[15] : data_values[15], # U
+        data_keys[16] : data_values[16], # V
+        data_keys[17] : data_values[17], # W               
+        }
+        print(data_dict)
+        self.client.collection("sparkfun").create()
+    
+    def get_material_id(self, material_input):
+        """
+        Récupère les matériaux présents dans la bdd et teste si le nom de matériau en paramètre 
+        Récupère l'identifiant si le matériau existe déjà et sinon crée la ligne en demandant la recyclabilité
+        renvoie l'id du matériau inséré/entré
+        """
+        materials_list = self.client.collection("materiau").get_full_list()
+        contained = False # Tiens compte si le matériau est dans la bdd
+        for mat in materials_list :
+            if material_input == mat['nom_materiau'] : # On suppose que les nom_materiau sont uniques pour chaque materiau
+                material_id = mat['id']
+                contained = True
+        if not contained : # Si le matériau entré n'existe pas dans la bdd, l'ajouter
+            self.client.collection("materiau").create(
+                {
+                'nom_materiau' : material_input,
+                'recyclabilite' : str(input("saisir la recyclabilite du materiau (True/False) : ")),
+                }
+            )
+            material_id = self.client.collection("materiau").get_full_list(batch=1)['id'] # Récupère l'id du dernier matériau inséré (voire ci-dessus)
+        return material_id
+    
     def _add_gps_data(self, data_keys : list, data_values : list):
         self.client.collection("borne").update(
             {'lat_actuel' : data_values[1], # lat
@@ -117,6 +113,60 @@ class TTNDataHandler:
         except :
             print('bouhouhouuu')
             pass 
+        
+        
+    def _add_sparkfun_data_s2(self, data_keys : list, data_values : list,):
+        """
+        Pour la phase d'identification (2), appelée à la réception de donnée
+        data_keys étant le nom des attributs du payload et data_values les valeurs associées
+        WIP DOCSTRING EXPLAIN METHOD GOAL
+        """
+        # On demande les informations lors du remplissage de la bdd
+        material_input = str(input("saisir le matériau du déchet : "))
+        material_id = self.get_material_id(material_input)
+        objet_input = str(input("saisir l'objet associé au déchet : "))
+        borne_input = "h6h259zvkm8a53x" # On suppose que la borne utilisée sera la seule existante
+        user_id_input = os.getenv('SUPER_ID') # On suppose que le seul superuser rentre les data
+
+            #objets_list = self.client.collection("objet").get_full_list()
+            #if objet_input not in objets_list : # Si l'objet entré n'existe pas dans la bdd, l'ajouter
+            #    self.client.collection("objet").create(
+            #        {
+            #        'nom_objet' : objet_input,
+            #        'user' : user_id_input,
+            #        'materiau' : material_id,
+            #        }
+            #    )
+            #objet = objet_input
+
+            #'borne' : borne_input,
+            #'objet' : objet,
+        
+        print("insertion en cours...")
+        
+        data_dict = {
+        'material' : material_input,
+        data_keys[0] : data_values[0], # A
+        data_keys[1] : data_values[1], # B
+        data_keys[2] : data_values[2], # C
+        data_keys[3] : data_values[3], # D
+        data_keys[4] : data_values[4], # E
+        data_keys[5] : data_values[5], # F
+        data_keys[6] : data_values[6], # G
+        data_keys[7] : data_values[7], # H
+        data_keys[8] : data_values[8], # I
+        data_keys[9] : data_values[9], # J
+        data_keys[10] : data_values[10], # k
+        data_keys[11] : data_values[11], # L
+        data_keys[12] : data_values[12], # R
+        data_keys[13] : data_values[13], # S
+        data_keys[14] : data_values[14], # T
+        data_keys[15] : data_values[15], # U
+        data_keys[16] : data_values[16], # V
+        data_keys[17] : data_values[17], # W               
+        }
+        print(data_dict)
+        self.client.collection("sparkfun").create()
         
     def decode(self, val):
         #a check : je ne suis pas sure que marche finalement, mais voir pourquoi???
@@ -164,8 +214,8 @@ class TTNDataHandler:
         else : 
             return "Erreur : matériau non présent dans la base de donnée"
         
-obj = TTNDataHandler()
-obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  
+#obj = TTNDataHandler()
+#obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  
 #obj._add_sparkfun_data_s1( ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T','U', 'V', 'W'], [0 for i in range (18)])  
     
 
