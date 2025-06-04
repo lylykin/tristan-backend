@@ -200,11 +200,12 @@ class TTNDataHandler:
                     }
                 )
         
-    def decode(self, val):
+    def decode_sparkdata(sparkdata, val):
         #a check : je ne suis pas sure que marche finalement, mais voir pourquoi???
         
         if val.expand == {}: 
-            return val  
+            return val 
+            
         val.material = val.expand['material']
         return val 
          
@@ -217,20 +218,22 @@ class TTNDataHandler:
         #récupération des records en brut des matériaux
         #pb : je m'attends à une jointure, alors que j'ai
         #l'impression que seuls l'attribut materials est renvoyé wtff
-        materials = self.client.collection("sparkfun").get_full_list(100,
+        self.spark_data = self.client.collection("sparkfun").get_full_list(100,
          {"expand": 'material'})
-        
-        #deuxième requete parce que wtfff
-        spark_data = self.client.collection("sparkfun").get_full_list(100)
-        
-        #si j'ai bien compris, val est à 0 quand ya rien
-        #mais ne dervait pas arriver dans notre cas
 
         #formattage des données materials
+        pb_data = {}
         materials_data = []
-        for mat in materials: 
-            #heu pourquoi l???
-            materials_data.append(self.decode(mat.material))
+
+        for mat in self.spark_data: 
+            list_letters = []
+
+            for letter in 'abcdefghijklrstuvw' :
+                list_letters.append(mat.letter)
+                
+            pb_data[list_letters] = mat.material
+            materials_data.append(mat.material)    
+            #materials_data.append(self.decode(mat).material)
         print(f'pb_data : {materials_data}')
 
             
