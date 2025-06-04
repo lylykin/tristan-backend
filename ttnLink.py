@@ -110,7 +110,7 @@ class TTNDataHandler:
 
             if list(dico_payload.keys())[0] == 'A' : 
                 print('test bon : le message est correctement formaté')
-                self._spark_knn(list(dico_payload.keys()), list(dico_payload.values()))
+                self._spark_knn(dico_payload)
                 
             else :
                 self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))   
@@ -119,6 +119,7 @@ class TTNDataHandler:
             pass 
         
     def decode(self, val):
+        #a check : je ne suis pas sure que marche finalement, mais voir pourquoi???
         
         if val.expand == {}: 
             return val  
@@ -135,6 +136,7 @@ class TTNDataHandler:
         materials = self.client.collection("sparkfun").get_full_list(100,
             {"expand": 'material'})
         
+        #si j'ai bien compris, val est à 0 quand ya rien
         pb_data = []
         for mat in materials: 
             pb_data.append(self.decode(mat).l)

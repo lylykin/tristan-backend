@@ -5,9 +5,10 @@ from math import sqrt
 # phase de test
 class KNN() : 
     data_test : list
+    dico_ref : dict
 
-    def __init__(self, data_test) : 
-        self.knnData  = {}
+    def __init__(self, data_test : list, dico_ref : dict) : 
+        self.knnData  = dico_ref
         self.value = data_test
 
     def knn(self, k = 7) :        
