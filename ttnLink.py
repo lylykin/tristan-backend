@@ -100,17 +100,16 @@ class TTNDataHandler:
         message = ast.literal_eval(msg.payload.decode())
         
         #le try except sert à la gestion des erreurs. Si                                                                                                                                                                                                                                                   
-        try : 
-            dico_payload = message['uplink_message']['decoded_payload']
-            print(dico_payload)
-
-            if list(dico_payload.keys())[0] == 'A' : 
-                print('test bon : le message est correctement formaté')
-                self._spark_knn(dico_payload)
-                
-            else :
-                self._add_gps_data(dico_payload)+3   
-        except :
+        #try : 
+        dico_payload = message['uplink_message']['decoded_payload']
+        print(dico_payload)
+        if list(dico_payload.keys())[0] == 'A' : 
+            print('test bon : le message est correctement formaté')
+            self._spark_knn(dico_payload)
+            
+        else :
+            self._add_gps_data(dico_payload)+3   
+        #except :
             print('bouhouhouuu')
             pass 
         
@@ -214,51 +213,79 @@ class TTNDataHandler:
         doit retourner le matériau identifié par le knn
         """
         data_list = list(dico_data.values())
-        print(f'liste des données : {data_list}')
-        #récupération des records en brut des matériaux
-        #pb : je m'attends à une jointure, alors que j'ai
-        #l'impression que seuls l'attribut materials est renvoyé wtff
-        self.spark_data = self.client.collection("sparkfun").get_full_list(100,
+        data_list.pop(-1)
+        #print(f'liste des données : {data_list}')
+        
+        #récupération des records en brut des données de la table sparkfun
+        print('récupération des données dans la db\n')
+        self.spark_data = self.client.collection("sparkfun").get_full_list(50,
          {"expand": 'material'})
 
         #formattage des données materials
+        print('formattage des données en cours')
         pb_data = {}
         materials_data = []
+        index = 0
 
-        for mat in self.spark_data: 
-            list_letters = []
-
-            for letter in 'abcdefghijklrstuvw' :
-                list_letters.append(mat.letter)
+        for mat in self.spark_data:
+            #récupérer, lettre par lettre, les données des lettres sparkfun
+            #bon, est bruteforce mais seul moyen de faire
+            materials_data.append((
+                mat.a,
+                mat.b,
+                mat.c,
+                mat.d,
+                mat.e,
+                mat.f,
+                mat.g,
+                mat.h,
+                mat.i,
+                mat.j,
+                mat.k,
+                mat.l,
+                mat.r,
+                mat.s,
+                mat.t,
+                mat.u,
+                mat.v,
+                mat.w
+                )
+            )
                 
-            pb_data[list_letters] = mat.material
-            materials_data.append(mat.material)    
-            #materials_data.append(self.decode(mat).material)
-        print(f'pb_data : {materials_data}')
+            # asssociation des données sparkfun à son matériau, 
+            #formattage pour knn
+            pb_data[materials_data[index]] = mat.material
+            index += 1
+        print(f'pb_data : {pb_data}')
+        print('formattage fini')
+
                 
         #print(materials)
         #identification
         print("Identification du matériau en cours")
         ident = KNN(data_list, pb_data)
-
-        #ident.addKnnData(pb_data, None)
+        
         id_material = ident.knn()
         #for now it is a print. plus tard, l'ajouter dans l'historique de l'user, et le récupérer comme ca pour le frontend
-        print(f"ifentificaation terminée. le matériau est : {id_material}")
+        print(f"ifentification terminée. le matériau est : {id_material}")
+        print (id_material, self.is_recyclable(id_material))
         return (id_material, self.is_recyclable(id_material))
 
-    def is_recyclable(self, mat) : 
+    def is_recyclable(self, nom_mat : int) : 
         """"
         returns if a material is recyclable or not
         """
-        if mat.material != "":
+        print("vérification de la recyclabilité")
+        #récupération des infos sur les matériaux et leur recyclabilité :
+        if nom_mat != '' : 
+            mat = self.client.collection('materiau').get_list(50, {f'fliter' : 'id = {nom_mat}'})
             return mat.material.recyclabilite
         else : 
             return "Erreur : matériau non présent dans la base de donnée"
         
-obj = TTNDataHandler()
-obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  
-#obj._add_sparkfun_data_s1( ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T','U', 'V', 'W'], [0 for i in range (18)])  
+#obj = TTNDataHandler()
+#print(obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  )
+##obj._add_sparkfun_data_s1( ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T','U', 'V', 'W'], [0 for i in range (18)])  
     
 
 
