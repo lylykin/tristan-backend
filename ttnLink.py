@@ -37,13 +37,13 @@ class TTNDataHandler:
         On demande le matériau associé à la mesure, traite sa création si besoin et on ajoute les valeurs aux attributs de sparkfun
         """
         # On demande les informations lors du remplissage de la bdd
-        material_input = str(input("saisir le matériau du déchet : "))
+        material_input = str(input("Donnée Sparkfun reçue\nSaisir le matériau du déchet : "))
         material_id = self.add_material_if_needed(material_input)
         
         print("Phase 1 : Insertion en cours...")
         
         data_dict = {
-        'material' : material_input,
+        'material' : material_id,
         data_keys[0] : data_values[0], # A
         data_keys[1] : data_values[1], # B
         data_keys[2] : data_values[2], # C
@@ -75,14 +75,15 @@ class TTNDataHandler:
         materials_list = self.client.collection("materiau").get_full_list()
         contained = False # Tiens compte si le matériau est dans la bdd
         for mat in materials_list :
-            if material_input == mat['id'] : # On suppose que les id ou nom de materiaux sont uniques pour chaque materiau
-                material_id = mat['id']
+            id = mat.id
+            if material_input == id : # On suppose que les id ou nom de materiaux sont uniques pour chaque materiau
+                material_id = id
                 contained = True
         if not contained : # Si le matériau entré n'existe pas dans la bdd, l'ajouter
             self.client.collection("materiau").create(
                 {
                 'id' : material_input,
-                'recyclabilite' : str(input("saisir la recyclabilite du materiau (True/False) : ")),
+                'recyclabilite' : str(input("Nouveau matériau,\nSaisir la recyclabilite du materiau (True/False) : ")),
                 }
             )
             material_id = material_input #self.client.collection("materiau").get_full_list(batch=1)['id'] # Récupère l'id du dernier matériau inséré (voire ci-dessus)
@@ -169,7 +170,7 @@ class TTNDataHandler:
             {filter: f'objet == {objet_id}'}
         )
         for mesure in mesures_list:
-            self.client.collection("sparkfun").update(mesure['id'],
+            self.client.collection("sparkfun").update(mesure.id,
                     {
                     'material' : material_id,
                     }

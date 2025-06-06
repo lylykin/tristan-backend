@@ -41,7 +41,7 @@ class KNN() :
             
         dist.sort() 
         #print (dist)
-        return [self.knnData[dist[j][1]] for j in range (k)]
+        return [self.knnData[dist[j][1]] for j in range (k)] # Crash si ddb vide
 
     def identification(self):
         print("identification du matériau")
