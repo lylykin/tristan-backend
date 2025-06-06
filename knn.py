@@ -30,17 +30,21 @@ class KNN() :
         returns the k-nearest neighbours of the data we want to identify
         k (int) : number of neighbours we want
         """ 
-        
+        print("recherche des plus proches voisisns")
         dist = []
         self.knnData
-                       
+        #print(f'les data sont :{self.knnData} ')
+        
+        #calcul de la distance                
         for data in self.knnData.keys():
             dist.append((euclidienne(self.value, data),data))
             
         dist.sort() 
+        #print (dist)
         return [self.knnData[dist[j][1]] for j in range (k)]
 
     def identification(self):
+        print("identification du matériau")
         nbr = {}
         for elt in self.liste_vois:
             if elt in nbr:
@@ -57,7 +61,7 @@ class KNN() :
 
 def euclidienne(list_a : list, list_b : list):
     "returns the euclidian distance of 2 series of the same lenght"
-    
+    print("calcul de la distance eucli")
     sum_dist = (list_a[0]-list_b[0])**2
     
     for i in range (1, len(list_a)) : 
