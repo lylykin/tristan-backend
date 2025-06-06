@@ -99,8 +99,9 @@ class TTNDataHandler:
         
         message = ast.literal_eval(msg.payload.decode())
         
-        #le try except sert à la gestion des erreurs. Si                                                                                                                                                                                                                                                   
+        #le try except sert à la gestion des erreurs.
         #try : 
+        print("coucou")
         dico_payload = message['uplink_message']['decoded_payload']
         print(dico_payload)
         if list(dico_payload.keys())[0] == 'A' : 
@@ -126,7 +127,6 @@ class TTNDataHandler:
         #material_id = self.add_material_if_needed(material_input)
         #objet_input = str(input("saisir l'objet associé au déchet : "))
         borne_input = "tristan1" # On suppose que la borne utilisée sera la seule existante
-        user_id_input = os.getenv('SUPER_ID') # On suppose que le seul superuser rentre les data
         #objet_id = self.add_object(objet_input, user_id_input)
         
         print("Phase 2 : Insertion en cours...")
@@ -190,7 +190,7 @@ class TTNDataHandler:
         """
         data_list = list(dico_data.values())
         data_list.pop(-1)
-        #print(f'liste des données : {data_list}')
+        print(f'liste des données : {data_list}')
         
         #récupération des records en brut des données de la table sparkfun
         print('récupération des données dans la db\n')
