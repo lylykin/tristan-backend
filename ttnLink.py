@@ -1,14 +1,16 @@
 from pocketbase import PocketBase  # Client also works the same
-import ast
 from dotenv import load_dotenv 
 import os
 from knn import KNN
+import json 
+
+
 
 # Classe TTNDataHandler qui doit avoir une méthode on_ttn_message
 class TTNDataHandler:
     client : PocketBase
     
-    def __init__(self, client = PocketBase('http://127.0.0.1:8090')):
+    def __init__(self, client = PocketBase('http://141.145.221.225:8090')):
         load_dotenv(dotenv_path="secret_dont_look_at_me.env")
         
         self.client = client
@@ -17,8 +19,9 @@ class TTNDataHandler:
     # Méthode appelée lorsque le client TTN reçoit un message
     def on_ttn_message_s1(self, client, userdata, msg):
         
-        #converts the recieved data as a dict
-        message = ast.literal_eval(msg.payload.decode())
+        #converts the recieved data as a    
+        
+        message = json.loads(msg.payload.decode())
         print(message)
         
         try : 
@@ -27,7 +30,7 @@ class TTNDataHandler:
                 self._add_sparkfun_data_s1(list(dico_payload.keys()), list(dico_payload.values()))
             else :
                 self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values())) 
-        except : 
+        except: 
             pass   
 
     def _add_sparkfun_data_s1(self, data_keys : list, data_values : list,):
@@ -38,34 +41,20 @@ class TTNDataHandler:
         """
         # On demande les informations lors du remplissage de la bdd
         material_input = str(input("Donnée Sparkfun reçue\nSaisir le matériau du déchet : "))
-        material_id = self.add_material_if_needed(material_input)
+        self.add_material_if_needed(material_input)
         
         print("Phase 1 : Insertion en cours...")
+        data_dict = { 
+                     data_keys[i]: data_values[i] 
+                     for i in range(len(data_values))
+                    }
         
-        data_dict = {
-        'material' : material_id,
-        data_keys[0] : data_values[0], # A
-        data_keys[1] : data_values[1], # B
-        data_keys[2] : data_values[2], # C
-        data_keys[3] : data_values[3], # D
-        data_keys[4] : data_values[4], # E
-        data_keys[5] : data_values[5], # F
-        data_keys[6] : data_values[6], # G
-        data_keys[7] : data_values[7], # H
-        data_keys[8] : data_values[8], # I
-        data_keys[9] : data_values[9], # J
-        data_keys[10] : data_values[10], # k
-        data_keys[11] : data_values[11], # L
-        data_keys[12] : data_values[12], # R
-        data_keys[13] : data_values[13], # S
-        data_keys[14] : data_values[14], # T
-        data_keys[15] : data_values[15], # U
-        data_keys[16] : data_values[16], # V
-        data_keys[17] : data_values[17], # W               
-        }
+        data_dict['material'] = material_input
+ 
         print(data_dict)
         self.client.collection("sparkfun").create(data_dict)
-    
+ 
+ #Dorian, pour moi ta méthode a pas besoin de return car material_input est pas modifié...   
     def add_material_if_needed(self, material_input):
         """
         Récupère les matériaux présents dans la bdd et teste si le nom de matériau en paramètre existe
@@ -82,41 +71,48 @@ class TTNDataHandler:
         if not contained : # Si le matériau entré n'existe pas dans la bdd, l'ajouter
             self.client.collection("materiau").create(
                 {
-                'id' : material_input,
-                'recyclabilite' : str(input("Nouveau matériau,\nSaisir la recyclabilite du materiau (True/False) : ")),
+                    'id' : material_input,
+                    'recyclabilite' : str(input("Nouveau matériau,\nSaisir la recyclabilite du materiau (True/False) : ")),
                 }
             )
-            material_id = material_input #self.client.collection("materiau").get_full_list(batch=1)['id'] # Récupère l'id du dernier matériau inséré (voire ci-dessus)
-        return material_id
+            
+            material_input #self.client.collection("materiau").get_full_list(batch=1)['id'] # Récupère l'id du dernier matériau inséré (voir ci-dessus)
+
     
     def _add_gps_data(self, data_keys : list, data_values : list):
         self.client.collection("borne").update(
-            {'lat_actuel' : data_values[1], # lat
-             'long_actuel' : data_values[2], # longitude
+            {
+                'lat_actuel'  : data_values[1], # lat
+                'long_actuel' : data_values[2], # longitude
             }
         )
         
-    def on_ttn_message_s2(self, client, userdata, msg) :
+    def on_ttn_message_s2(self, client, userdata, msg : dict) :
         
-        message = ast.literal_eval(msg.payload.decode())
+        message = json.loads(msg.payload.decode())
         
         #le try except sert à la gestion des erreurs.
         #try : 
         print("coucou")
         dico_payload = message['uplink_message']['decoded_payload']
         print(dico_payload)
+        
         if list(dico_payload.keys())[0] == 'A' : 
             print('test bon : le message est correctement formaté')
-            self._spark_knn(dico_payload)
+            mat, recyclable = self._spark_knn(dico_payload)
+            self._add_sparkfun_data_s2(list(dico_payload.keys()), list(dico_payload.values()), mat)
+            self.update_knn_found_material(mat)
+            return(mat, recyclable)
+            
             
         else :
-            self._add_gps_data(dico_payload)+3   
+            self._add_gps_data(dico_payload)   
         #except :
             print('bouhouhouuu')
             pass 
         
         
-    def _add_sparkfun_data_s2(self, data_keys : list, data_values : list,):
+    def _add_sparkfun_data_s2(self, data_keys : list, data_values : list, mat : str):
         """
         Pour la phase d'identification (2), appelée à la réception de donnée
         data_keys étant le nom des attributs du payload et data_values les valeurs associées
@@ -124,50 +120,36 @@ class TTNDataHandler:
         Ajoute les informations à la database suivant data_keys et data_values
         """
         # On demande les informations lors du remplissage de la bdd
-        #material_input = str(input("saisir le matériau du déchet : "))
-        #material_id = self.add_material_if_needed(material_input)
-        #objet_input = str(input("saisir l'objet associé au déchet : "))
+        self.add_material_if_needed(mat)
+        
+        #je le passe en attribut pour faciliter l'appel de l'une de tes fonctions
+        self.objet = str(input("saisir l'objet associé au déchet : "))
         borne_input = "tristan1" # On suppose que la borne utilisée sera la seule existante
         #objet_id = self.add_object(objet_input, user_id_input)
         
         print("Phase 2 : Insertion en cours...")
         
-        data_dict = {
-        'borne' : borne_input,
-        data_keys[0] : data_values[0], # A
-        data_keys[1] : data_values[1], # B
-        data_keys[2] : data_values[2], # C
-        data_keys[3] : data_values[3], # D
-        data_keys[4] : data_values[4], # E
-        data_keys[5] : data_values[5], # F
-        data_keys[6] : data_values[6], # G
-        data_keys[7] : data_values[7], # H
-        data_keys[8] : data_values[8], # I
-        data_keys[9] : data_values[9], # J
-        data_keys[10] : data_values[10], # k
-        data_keys[11] : data_values[11], # L
-        data_keys[12] : data_values[12], # R
-        data_keys[13] : data_values[13], # S
-        data_keys[14] : data_values[14], # T
-        data_keys[15] : data_values[15], # U
-        data_keys[16] : data_values[16], # V
-        data_keys[17] : data_values[17], # W               
-        }
+        data_dict = {data_keys[i] : data_values[i]
+                    for i in range(len(data_values))}
+        data_dict['borne'] = borne_input
+        data_dict['material'] = mat
+
         print(data_dict)
         self.client.collection("sparkfun").create(data_dict)
     
-    def update_knn_found_material(self, objet_id, material_id):
+    def update_knn_found_material(self, material_id):
         """
         Modifie les collections objet et sparkfun pour leur associer le matériau détecté par le knn
         (à chaque mesure associé à l'objet inséré par l'utilisateur)
         """
-        self.client.collection("objet").update(objet_id,
+        self.client.collection("objet").update(self.objet,
                 {
-                'material' : material_id,
+                  'material' : material_id,
                 }
             )
+        
         mesures_list = self.client.collection("sparkfun").get_full_list(
-            {filter: f'objet == {objet_id}'}
+            {filter: f'objet == {self.objet}'}
         )
         for mesure in mesures_list:
             self.client.collection("sparkfun").update(mesure.id,
@@ -175,16 +157,7 @@ class TTNDataHandler:
                     'material' : material_id,
                     }
                 )
-        
-    def decode_sparkdata(sparkdata, val):
-        #a check : je ne suis pas sure que marche finalement, mais voir pourquoi???
-        
-        if val.expand == {}: 
-            return val 
-            
-        val.material = val.expand['material']
-        return val 
-         
+
     def _spark_knn(self, dico_data : dict) : 
         """
         doit retourner le matériau identifié par le knn
@@ -226,8 +199,7 @@ class TTNDataHandler:
                 mat.u,
                 mat.v,
                 mat.w
-                )
-            )
+            ))
                 
             # asssociation des données sparkfun à son matériau, 
             #formattage pour knn
@@ -245,7 +217,7 @@ class TTNDataHandler:
         id_material = ident.knn()
         #for now it is a print. plus tard, l'ajouter dans l'historique de l'user, et le récupérer comme ca pour le frontend
         print(f"ifentification terminée. le matériau est : {id_material}")
-        print (id_material, self.is_recyclable(id_material))
+        #print (id_material, self.is_recyclable(id_material))
         return (id_material, self.is_recyclable(id_material))
 
     def is_recyclable(self, nom_mat : int) : 
@@ -255,7 +227,7 @@ class TTNDataHandler:
         print("vérification de la recyclabilité")
         #récupération des infos sur les matériaux et leur recyclabilité :
         if nom_mat != '' : 
-            mat = self.client.collection('materiau').get_list(50, {f'fliter' : 'id = {nom_mat}'})
+            mat = self.client.collection('materiau').get_list(50, {f'filter' : 'id = {nom_mat}'})
             return mat.material.recyclabilite
         else : 
             return "Erreur : matériau non présent dans la base de donnée"
