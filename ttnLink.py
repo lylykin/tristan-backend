@@ -10,7 +10,7 @@ import json
 class TTNDataHandler:
     client : PocketBase
     
-    def __init__(self, client = PocketBase('http://141.145.221.225:8090')):
+    def __init__(self, client = PocketBase('http://vps-2244fb93.vps.ovh.net')):
         load_dotenv(dotenv_path="secret_dont_look_at_me.env")
         
         self.client = client
@@ -169,7 +169,7 @@ class TTNDataHandler:
         #récupération des records en brut des données de la table sparkfun
         print('récupération des données dans la db\n')
         self.spark_data = self.client.collection("sparkfun").get_full_list(50,
-         {"expand": 'material'})
+         {'expand': 'material', filter : 'objet=""+'})
 
         #formattage des données materials
         print('formattage des données en cours')
