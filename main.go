@@ -2,6 +2,8 @@ package main
 
 // go run main.go serve
 // Permet de lancer le fichier et donc le serveur
+// Supprimer le fichier local data.db si conflict avec les migrations
+// (elles seront alors appliquées et recréation de la base suivra)
 
 import (
 	"log"
