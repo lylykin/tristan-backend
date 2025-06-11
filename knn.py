@@ -5,6 +5,10 @@ from math import sqrt
 # phase de test
 class KNN() : 
     data_test : list
+    dico_ref : dict
+
+    def __init__(self, data_test : list, dico_ref : dict) : 
+        self.knnData  = dico_ref
 
     def __init__(self, data_test) : 
         self.knnData  = {}
@@ -15,12 +19,14 @@ class KNN() :
         return self.identification()
          
 
-    def addKnnData(self, elt : list, name : str):
-        """
-        adds a list of points into the KNN test data.
-        elt : array of the data we want to add
-        """ 
-        self.knnData[elt] = name 
+    # def addKnnData(self, elt_list : list, name_list : str):
+    #    """
+    #    adds a list of points into the KNN test data.
+    #    elt : array of the data 
+    #    """ 
+    #    #for elt, name in elt_list, name_list : 
+    #    #    self.knnData[elt] = name 
+    #    pass
 
 
     def plus_proche_voisins(self, k : int = 7):
@@ -28,17 +34,21 @@ class KNN() :
         returns the k-nearest neighbours of the data we want to identify
         k (int) : number of neighbours we want
         """ 
-        
+        print("recherche des plus proches voisisns")
         dist = []
-        data_dict = self.knnData
-                       
-        for data in data_dict.keys():
+        self.knnData
+        #print(f'les data sont :{self.knnData} ')
+        
+        #calcul de la distance 
+        for data in self.knnData.keys():
             dist.append((euclidienne(self.value, data),data))
             
         dist.sort() 
-        return [data_dict[dist[j][1]] for j in range (k)]
+        #print (dist)
+        return [self.knnData[dist[j][1]] for j in range (k)]
 
     def identification(self):
+        print("identification du matériau")
         nbr = {}
         for elt in self.liste_vois:
             if elt in nbr:
@@ -55,6 +65,8 @@ class KNN() :
 
 def euclidienne(list_a : list, list_b : list):
     "returns the euclidian distance of 2 series of the same lenght"
+    print("calcul de la distance eucli")
+
     
     sum_dist = (list_a[0]-list_b[0])**2
     
@@ -75,10 +87,10 @@ fruits = {
     (7, 6): 'pomme',
     (8, 4): 'pomme'}
 
-A = KNN((1,3))
-for val in fruits.items():
-    A.addKnnData(val[0], val[1])
-
-print(A.knn(k=2))
+#A = KNN((1,3))
+#for val in fruits.items():
+#    A.addKnnData(val[0], val[1])
+#
+#print(A.knn(k=2))
 
 

@@ -83,7 +83,7 @@ def on_connect(client, userdata, flags, rc):
 
 #cas variable si on est en phase de construction de la bdd(1) ou de comparaison des data à la bdd(2)
 
-stage = 2
+stage = int(input("stage du projet : "))
 
 if stage == 1:
     client.on_connect = on_connect
@@ -91,7 +91,7 @@ if stage == 1:
     #client.on_message = on_message  
 else : 
     client.on_connect = on_connect
-    client.on_message = ttn_data_handler.data_handler.on_ttn_message_s2 #n'existe pas encore mais c'est pas la priorité
+    client.on_message = ttn_data_handler.on_ttn_message_s2 
     #client.on_message = on_message
 
 
