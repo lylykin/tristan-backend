@@ -10,7 +10,7 @@ import json
 class TTNDataHandler:
     client : PocketBase
     
-    def __init__(self, client = PocketBase('http://vps-2244fb93.vps.ovh.net')):
+    def __init__(self, client = PocketBase('https://vps-2244fb93.vps.ovh.net')):
         load_dotenv(dotenv_path="secret_dont_look_at_me.env")
         
         self.client = client
