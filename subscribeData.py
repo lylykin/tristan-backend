@@ -10,10 +10,6 @@ class PBdataListener:
         admin_id_secret = os.getenv('SUPER_ID')
         admin_pass_secret = os.getenv('SUPER_PASS')
 
-        # WARNING: code review: not gud 
-        # faut éviter de faire plusieurs connection en même temps
-        # donc réutiliser le même point pocketbase ouvert dans
-        # datamanager.py celui créé par ttnLink 
         self.client = PocketBase('http://127.0.0.1:8090')
 
         # (Optionally) authenticate
@@ -21,9 +17,10 @@ class PBdataListener:
         #user_data.is_valid
         # as admin
         self.admin_data = self.client.admins.auth_with_password(admin_id_secret, admin_pass_secret)
-        
+        self.admin_data.is_valid
+
     # Traitement des changements
-    def on_change_callback(event) : 
+    def on_change(event) : 
         print(event["action"]) 
         print(event["record"])
 
@@ -31,10 +28,10 @@ class PBdataListener:
     def subscribe_sparkfun(self):
         # Récupération des changements
         self.client.collection('sparkfun').subscribe(
-            #'*', # Sujet (nom de la ligne (ex : 'RECORD_ID'), ou toutes les lignes : *) NON NECESSAIRE EN PYTHON (méthodes différentes ligne/collection)
-            callback=self.on_change_callback
+
+        #'*', # Sujet (nom de la ligne (ex : 'RECORD_ID'), ou toutes les lignes : *) NON NECESSAIRE EN PYTHON (méthodes différentes ligne/collection)
+        callback=self.on_change
         )
-        
         self.client.collection("sparkfun").update(
             "f8j9py6i289vvce",
             {
@@ -59,8 +56,6 @@ class PBdataListener:
                  }
         )
 
-
-        
         # Unsubscribe
         #client.collection('sparkfun').unsubscribe('RECORD_ID') # remove all 'RECORD_ID' subscriptions
         #client.collection('sparkfun').unsubscribe('*') # remove all '*' topic subscriptions

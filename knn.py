@@ -3,18 +3,32 @@ from math import sqrt
 #what my knn class needs : 
 #in the 1st phatse, i'll need a KNN builder, and the the KNN indentification, based on Deborah's code
 # phase de test
-class KNN : 
-    value : list
-    knnData : dict
+class KNN() : 
+    data_test : list
+    dico_ref : dict
 
     def __init__(self, data_test : list, dico_ref : dict) : 
         self.knnData  = dico_ref
+
+    def __init__(self, data_test) : 
+        self.knnData  = {}
         self.value = data_test
 
-    def knn(self, k = 5) :        
-        self.liste_vois = self.plus_proche_voisins()
+    def knn(self, k = 7) :        
+        self.liste_vois  = self.plus_proche_voisins()
         return self.identification()
          
+
+    # def addKnnData(self, elt_list : list, name_list : str):
+    #    """
+    #    adds a list of points into the KNN test data.
+    #    elt : array of the data 
+    #    """ 
+    #    #for elt, name in elt_list, name_list : 
+    #    #    self.knnData[elt] = name 
+    #    pass
+
+
     def plus_proche_voisins(self, k : int = 7):
         """
         returns the k-nearest neighbours of the data we want to identify
@@ -22,28 +36,25 @@ class KNN :
         """ 
         print("recherche des plus proches voisisns")
         dist = []
-        
+        self.knnData
         #print(f'les data sont :{self.knnData} ')
         
-        #calcul de la distance                
+        #calcul de la distance 
         for data in self.knnData.keys():
-            dist.append((euclidienne(self.value, data), data))
+            dist.append((euclidienne(self.value, data),data))
             
         dist.sort() 
         #print (dist)
-        return [self.knnData[dist[j][1]] for j in range (k)] # Crash si ddb vide
+        return [self.knnData[dist[j][1]] for j in range (k)]
 
     def identification(self):
         print("identification du matériau")
-        
         nbr = {}
-        
         for elt in self.liste_vois:
             if elt in nbr:
                 nbr[elt] += 1
             else:
                 nbr[elt] = 1
-                
         max = 0
         type = ""
         for valeur in nbr.items():
@@ -55,13 +66,13 @@ class KNN :
 def euclidienne(list_a : list, list_b : list):
     "returns the euclidian distance of 2 series of the same lenght"
     print("calcul de la distance eucli")
-    sum_dist = 0
+
     
-    for i in range (0, len(list_a)) : 
+    sum_dist = (list_a[0]-list_b[0])**2
+    
+    for i in range (1, len(list_a)) : 
         sum_dist += (list_a[i]- list_b[i])**2
     
-    # <!> a revérifier, mais normalement la racine carré sert 
-    # a rien ici, par bijection réciproque 
     return sqrt(sum_dist)
    
 fruits = {
@@ -81,5 +92,5 @@ fruits = {
 #    A.addKnnData(val[0], val[1])
 #
 #print(A.knn(k=2))
-#
+
 
