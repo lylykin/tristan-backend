@@ -8,14 +8,13 @@ class KNN() :
     dico_ref : dict
 
     def __init__(self, data_test : list, dico_ref : dict) : 
-        self.knnData  = dico_ref
-        self.value = data_test
+        self.knnData, self.value = normalize(dico_ref, data_test)
 
     def knn(self) :        
         self.liste_vois  = self.plus_proche_voisins()
         return self.identification()
 
-    def plus_proche_voisins(self, k : int = 11):
+    def plus_proche_voisins(self, k : int = 7):
         """
         returns the k-nearest neighbours of the data we want to identify
         k (int) : number of neighbours we want
@@ -48,11 +47,10 @@ class KNN() :
                 max = valeur[1]
                 type = valeur[0]
         return type
+    
 
 def euclidienne(list_a : list, list_b : list):
     "returns the euclidian distance of 2 series of the same lenght"
-    print("calcul de la distance eucli")
-
     
     sum_dist = (list_a[0]-list_b[0])**2
     
@@ -60,7 +58,46 @@ def euclidienne(list_a : list, list_b : list):
         sum_dist += (list_a[i]- list_b[i])**2
     
     return sqrt(sum_dist)
-   
+
+
+def normalize(data_dico : dict, data_list) :
+    
+    "normalise les data passées en paramètre, pour que toutes les dimensions soient entre 0 et 1"
+    
+    norma_dict = {}
+    norma_list = []
+    max_vals=[0 for _ in range (len(data_dico.keys()))]
+    
+    #on parcoure les lettres une à une, pour rechercher le plus grand.
+    for i in range(len(data_dico.keys())) : 
+                
+        for spark_data in data_dico.keys():
+             #recherche de la plus grande valeur pour la lettre correspondante
+            if spark_data[i] >max_vals[i] :
+                max_vals[i] = spark_data[i]
+        
+        if data_list[i]>max_vals[i]: 
+            max_vals[i] = data_list[i]
+            
+    #normalisation des datas dans la db
+    for spark_data in data_dico.keys():
+        
+        vals = []
+        
+        #les deux ont forcément la même taille et les données dans le même sens.
+        for val in len(spark_data) : 
+            vals.append(spark_data[val]/max_vals[val])
+            norma_list.append(data_list[val]/max_vals[i])
+            
+        #dico avec les valeurs normalisées.
+        norma_dict[vals] = data_dico[spark_data]
+        
+    return (norma_dict, norma_list)
+
+
+    
+    
+  
 fruits = {
     (1, 3): 'poire',
     (3, 5): 'poire',

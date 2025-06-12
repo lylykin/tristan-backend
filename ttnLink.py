@@ -166,12 +166,15 @@ class TTNDataHandler:
         doit retourner le matériau identifié par le knn
         """
         data_list = list(dico_data.values())
+        #suppression du len et du L qui est vraiment trop bizarre pour l'analyse
         data_list.pop(-1)
+        data_list.pop(11)
+    
         print(f'liste des données : {data_list}')
         
         #récupération des records en brut des données de la table sparkfun
         print('récupération des données dans la db\n')
-        self.spark_data = self.client.collection("sparkfun").get_full_list(50,
+        self.spark_data = self.client.collection("sparkfun").get_full_list(100,
          {'expand': 'material', filter : 'objet=""'})
 
         #formattage des données materials
@@ -195,7 +198,7 @@ class TTNDataHandler:
                 mat.i,
                 mat.j,
                 mat.k,
-                mat.l,
+                #mat.l,
                 mat.r,
                 mat.s,
                 mat.t,
@@ -212,7 +215,6 @@ class TTNDataHandler:
         print('formattage fini')
 
                 
-        #print(materials)
         #identification
         print("Identification du matériau en cours")
         ident = KNN(data_list, pb_data)
@@ -230,8 +232,7 @@ class TTNDataHandler:
         print("vérification de la recyclabilité")
         #récupération des infos sur les matériaux et leur recyclabilité :
         if nom_mat != 'trash' : 
-            str_request = f"id={nom_mat}"
-            mat = self.client.collection("materiau").get_first_list_item(50,{filter: f"id='{nom_mat}'"})
+            mat = self.client.collection("materiau").get_first_list_item(filter= f"id='{nom_mat}'")
             #mat = self.client.collection("materiau").get_list(50, {"filter": f"id='{nom_mat}'"})
             return mat.recyclabilite
         else : 
