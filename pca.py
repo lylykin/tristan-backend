@@ -14,7 +14,7 @@ def pca(sparkfun):
     fig = plt.figure()
     ax = fig.add_subplot(projection="3d")
 
-    X_reduced = PCA(n_components=2).fit_transform(sparkfun['data'])
+    X_reduced = PCA(n_components=3).fit_transform(sparkfun['data'])
     scatter = ax.scatter(
         X_reduced[:, 0],
         X_reduced[:, 1],
