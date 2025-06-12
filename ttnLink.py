@@ -229,12 +229,13 @@ class TTNDataHandler:
         """
         print("vérification de la recyclabilité")
         #récupération des infos sur les matériaux et leur recyclabilité :
-        if nom_mat != '' : 
+        if nom_mat != 'trash' : 
             str_request = f"id={nom_mat}"
-            mat = self.client.collection('materiau').get_list(50, {filter : f'id="{nom_mat}"'})
-            return mat.material.recyclabilite
+            mat = self.client.collection("materiau").get_first_list_item(50,{filter: f"id='{nom_mat}'"})
+            #mat = self.client.collection("materiau").get_list(50, {"filter": f"id='{nom_mat}'"})
+            return mat.recyclabilite
         else : 
-            return "Erreur : matériau non présent dans la base de donnée"
+            return "Erreur : mesure incorrecte, refaites votre donnée"
     
     def pca(self):
         """

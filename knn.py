@@ -15,7 +15,7 @@ class KNN() :
         self.liste_vois  = self.plus_proche_voisins()
         return self.identification()
 
-    def plus_proche_voisins(self, k : int = 5):
+    def plus_proche_voisins(self, k : int = 11):
         """
         returns the k-nearest neighbours of the data we want to identify
         k (int) : number of neighbours we want
