@@ -55,7 +55,10 @@ class TTNDataHandler:
         data_dict['material'] = material_input
  
         print(data_dict)
-        self.client.collection("sparkfun").create(data_dict)
+        
+        #gestion plus facile des trash : on différencie les trash des empty
+        if material_input != 'trash' :
+            self.client.collection("sparkfun").create(data_dict)
  
  #Dorian, pour moi ta méthode a pas besoin de return car material_input est pas modifié...   
     def add_material_if_needed(self, material_input):
@@ -104,7 +107,7 @@ class TTNDataHandler:
             print('test bon : le message est correctement formaté')
             mat, recyclable = self._spark_knn(dico_payload)
             self._add_sparkfun_data_s2(list(dico_payload.keys()), list(dico_payload.values()), mat)
-            self.update_knn_found_material(mat)
+            #self.update_knn_found_material(mat)
             return(mat, recyclable)
             
             
@@ -126,6 +129,7 @@ class TTNDataHandler:
         self.add_material_if_needed(mat)
         
         #je le passe en attribut pour faciliter l'appel de l'une de tes fonctions
+        #au futur : doit être récup de la table objet?? marche pas si reste coté serveur
         self.objet = str(input("saisir l'objet associé au déchet : "))
         borne_input = "tristan1" # On suppose que la borne utilisée sera la seule existante
         #objet_id = self.add_object(objet_input, user_id_input)
@@ -140,6 +144,7 @@ class TTNDataHandler:
         print(data_dict)
         self.client.collection("sparkfun").create(data_dict)
     
+    #j'ai supprimé son utilisation car je suis pas sure de ce qu'elle fait + bugguée
     def update_knn_found_material(self, material_id):
         """
         Modifie les collections objet et sparkfun pour leur associer le matériau détecté par le knn
@@ -166,9 +171,9 @@ class TTNDataHandler:
         doit retourner le matériau identifié par le knn
         """
         data_list = list(dico_data.values())
-        #suppression du len et du L qui est vraiment trop bizarre pour l'analyse
+        #suppression du len qui est resté par je ne sais quelle sorcellerie
         data_list.pop(-1)
-        data_list.pop(11)
+        #data_list.pop(11)
     
         print(f'liste des données : {data_list}')
         
@@ -198,7 +203,7 @@ class TTNDataHandler:
                 mat.i,
                 mat.j,
                 mat.k,
-                #mat.l,
+                mat.l,
                 mat.r,
                 mat.s,
                 mat.t,
