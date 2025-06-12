@@ -246,14 +246,15 @@ class TTNDataHandler:
                          'target_names':[],
                          'target':[]}
         for mat in self.client.collection('sparkfun').get_full_list(100, {filter : f'object=""'}):
-            sparkfun_data['data'].append([mat.a,mat.b, mat.c, mat.d, mat.e, mat.f, mat.g, mat.h, mat.i, mat.j, mat.k, mat.l, mat.r, mat.s, mat.t, mat.u, mat.v, mat.w])
-            if mat.material not in sparkfun_data['target_names']:
-                sparkfun_data['target_names'].append(mat.material)
-            i = 0
-            while i < len(sparkfun_data['target_names']):
-                if sparkfun_data['target_names'][i] == mat.material:
-                    sparkfun_data['target'].append(i)
-                i += 1
+            if mat.material:# == 'verre' or mat.material == 'carton' or mat.material == 'alu':
+                sparkfun_data['data'].append([mat.a,mat.b, mat.c, mat.d, mat.e, mat.f, mat.g, mat.h, mat.i, mat.j, mat.k, mat.r, mat.s, mat.t, mat.u, mat.v, mat.w])
+                if mat.material not in sparkfun_data['target_names']:
+                    sparkfun_data['target_names'].append(mat.material)
+                i = 0
+                while i < len(sparkfun_data['target_names']):
+                    if sparkfun_data['target_names'][i] == mat.material:
+                        sparkfun_data['target'].append(i)
+                    i += 1
 
         pca.pca(sparkfun_data)
 

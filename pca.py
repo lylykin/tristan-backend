@@ -20,7 +20,8 @@ def pca(sparkfun):
         X_reduced[:, 1],
         X_reduced[:, 2],
         c=sparkfun['target'],
-        s=10,
+        s=5,
+        cmap = 'Accent'
     )
 
     ax.set(
