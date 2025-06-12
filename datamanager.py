@@ -54,7 +54,9 @@ stage = int(input("stage du projet : "))
 if stage == 1:
     client.on_connect = on_connect
     client.on_message = ttn_data_handler.on_ttn_message_s1
-    #client.on_message = on_message  
+    #client.on_message = on_message 
+elif stage == 3:
+    ttn_data_handler.pca() 
 else : 
     client.on_connect = on_connect
     client.on_message = ttn_data_handler.on_ttn_message_s2 

@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import os
 from knn import KNN
 import json 
+import pca
 
 
 
@@ -234,6 +235,29 @@ class TTNDataHandler:
             return mat.material.recyclabilite
         else : 
             return "Erreur : matériau non présent dans la base de donnée"
+    
+    def pca(self):
+        """
+        Fonction qui affiche un graphique en 3D en faisant des combinaisaons linéaires des 18D des matériaux
+
+        """
+        sparkfun_data = {'data':[],
+                         'target_names':[],
+                         'target':[]}
+        for mat in self.client.collection('sparkfun').get_full_list(100, {filter : f'object=""'}):
+            sparkfun_data['data'].append([mat.a,mat.b, mat.c, mat.d, mat.e, mat.f, mat.g, mat.h, mat.i, mat.j, mat.k, mat.l, mat.r, mat.s, mat.t, mat.u, mat.v, mat.w])
+            if mat.material not in sparkfun_data['target_names']:
+                sparkfun_data['target_names'].append(mat.material)
+            i = 0
+            while i < len(sparkfun_data['target_names']):
+                if sparkfun_data['target_names'][i] == mat.material:
+                    sparkfun_data['target'].append(i)
+                i += 1
+
+        pca.pca(sparkfun_data)
+
+
+
         
 #obj = TTNDataHandler()
 #print(obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  )
