@@ -9,27 +9,13 @@ class KNN() :
 
     def __init__(self, data_test : list, dico_ref : dict) : 
         self.knnData  = dico_ref
-
-    def __init__(self, data_test) : 
-        self.knnData  = {}
         self.value = data_test
 
-    def knn(self, k = 7) :        
+    def knn(self) :        
         self.liste_vois  = self.plus_proche_voisins()
         return self.identification()
-         
 
-    # def addKnnData(self, elt_list : list, name_list : str):
-    #    """
-    #    adds a list of points into the KNN test data.
-    #    elt : array of the data 
-    #    """ 
-    #    #for elt, name in elt_list, name_list : 
-    #    #    self.knnData[elt] = name 
-    #    pass
-
-
-    def plus_proche_voisins(self, k : int = 7):
+    def plus_proche_voisins(self, k : int = 5):
         """
         returns the k-nearest neighbours of the data we want to identify
         k (int) : number of neighbours we want

@@ -13,6 +13,8 @@ class TTNDataHandler:
     def __init__(self, client = PocketBase('https://vps-2244fb93.vps.ovh.net')):
         load_dotenv(dotenv_path="secret_dont_look_at_me.env")
         
+        print('j ai été inittt')
+        
         self.client = client
         self.super_user = self.client.admins.auth_with_password(os.getenv('SUPER_ID'), os.getenv('SUPER_PASS'))
 
@@ -93,7 +95,7 @@ class TTNDataHandler:
         
         #le try except sert à la gestion des erreurs.
         #try : 
-        print("coucou")
+        
         dico_payload = message['uplink_message']['decoded_payload']
         print(dico_payload)
         
@@ -149,7 +151,7 @@ class TTNDataHandler:
             )
         
         mesures_list = self.client.collection("sparkfun").get_full_list(
-            {filter: f'objet == {self.objet}'}
+            {filter: f'objet = {self.objet}'}
         )
         for mesure in mesures_list:
             self.client.collection("sparkfun").update(mesure.id,
@@ -169,7 +171,7 @@ class TTNDataHandler:
         #récupération des records en brut des données de la table sparkfun
         print('récupération des données dans la db\n')
         self.spark_data = self.client.collection("sparkfun").get_full_list(50,
-         {'expand': 'material', filter : 'objet=""+'})
+         {'expand': 'material', filter : 'objet=""'})
 
         #formattage des données materials
         print('formattage des données en cours')
@@ -227,7 +229,8 @@ class TTNDataHandler:
         print("vérification de la recyclabilité")
         #récupération des infos sur les matériaux et leur recyclabilité :
         if nom_mat != '' : 
-            mat = self.client.collection('materiau').get_list(50, {f'filter' : 'id = {nom_mat}'})
+            str_request = f"id={nom_mat}"
+            mat = self.client.collection('materiau').get_list(50, {filter : f'id="{nom_mat}"'})
             return mat.material.recyclabilite
         else : 
             return "Erreur : matériau non présent dans la base de donnée"
