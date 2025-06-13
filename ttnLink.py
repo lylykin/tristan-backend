@@ -14,8 +14,6 @@ class TTNDataHandler:
     def __init__(self, client = PocketBase('https://vps-2244fb93.vps.ovh.net')):
         load_dotenv(dotenv_path="secret_dont_look_at_me.env")
         
-        print('j ai été inittt')
-        
         self.client = client
         self.super_user = self.client.admins.auth_with_password(os.getenv('SUPER_ID'), os.getenv('SUPER_PASS'))
 
@@ -138,9 +136,13 @@ class TTNDataHandler:
         
         data_dict = {data_keys[i] : data_values[i]
                     for i in range(len(data_values))}
+        
         data_dict['borne'] = borne_input
         data_dict['material'] = mat
-        #data_dict['objet'] = self.objet
+        
+        #récupération de l'id de l'objet
+        obj_record = self.client.collection('objet').get_first_list_item(filter = f"nom_objet='{self.objet}'")
+        data_dict['objet'] = obj_record.id
 
         print(data_dict)
         self.client.collection("sparkfun").create(data_dict)
@@ -151,6 +153,9 @@ class TTNDataHandler:
         Modifie les collections objet et sparkfun pour leur associer le matériau détecté par le knn
         (à chaque mesure associé à l'objet inséré par l'utilisateur)
         """
+        
+        #récupération de l'id
+
         self.client.collection("objet").update(self.objet,
                 {
                   'material' : material_id,
@@ -238,9 +243,10 @@ class TTNDataHandler:
         print("vérification de la recyclabilité")
         #récupération des infos sur les matériaux et leur recyclabilité :
         if nom_mat != 'trash' : 
+            
             mat = self.client.collection("materiau").get_first_list_item(filter= f"id='{nom_mat}'")
-            #mat = self.client.collection("materiau").get_list(50, {"filter": f"id='{nom_mat}'"})
             return mat.recyclabilite
+        
         else : 
             return "Erreur : mesure incorrecte, refaites votre donnée"
     
