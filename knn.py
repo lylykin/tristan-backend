@@ -39,6 +39,7 @@ class KNN() :
     def identification(self):
         print("identification du matériau")
         nbr = {}
+        print(f'liste_vois : {self.liste_vois}')
         for elt in self.liste_vois:
             if elt in nbr:
                 nbr[elt] += 1
@@ -103,7 +104,12 @@ def normalize(data_dico : dict, data_list : list) :
         
     return (norma_dict, norma_list)
 
-
+"""
+IDEES AMELIORATION EVENTUELLE : 
+- pondération en fonction de la distance : plus le voisin est loin, plus la pondération est faible
+- normalisation a pas l'air de vraiment changer grand-chose
+- reecherche des voisins : 
+"""
     
     
   
