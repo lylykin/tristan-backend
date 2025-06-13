@@ -6,9 +6,11 @@ from math import sqrt
 class KNN() : 
     data_test : list
     dico_ref : dict
+    k : int
 
-    def __init__(self, data_test : list, dico_ref : dict) : 
+    def __init__(self, data_test : list, dico_ref : dict, k : int = 7) : 
         self.knnData, self.value = normalize(dico_ref, data_test)
+        self.k = k
         #print(self.knnData)
         #print(self.value)
 
@@ -16,7 +18,7 @@ class KNN() :
         self.liste_vois = self.plus_proche_voisins()
         return self.identification()
 
-    def plus_proche_voisins(self, k : int = 7):
+    def plus_proche_voisins(self):
         """
         returns the k-nearest neighbours of the data we want to identify
         k (int) : number of neighbours we want
@@ -32,7 +34,7 @@ class KNN() :
             
         dist.sort() 
         #print (dist)
-        return [self.knnData[dist[j][1]] for j in range (k)]
+        return [self.knnData[dist[j][1]] for j in range (self.k)]
 
     def identification(self):
         print("identification du matériau")
