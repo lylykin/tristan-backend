@@ -8,7 +8,18 @@ class KNN() :
     dico_ref : dict
     k : int
 
-    def __init__(self, data_test : list, dico_ref : dict, k : int = 7) : 
+    def __init__(self, data_test : list, dico_ref : dict, k : int = 7, reduce : bool = False) : 
+        print('avant', len(dico_ref))
+        if reduce:
+            #condition le materiel a tester doit etre parmi mat_a_mettre
+            dico_de_base = dico_ref.copy()
+            mat_a_mettre = ['verre', 'carton', 'alu', 'pap', 'papth', 'trash']
+            for liste, mat in dico_de_base.items():
+                if mat not in mat_a_mettre:
+                    print('------------------------------------------------------------------------')
+                    dico_ref.pop(liste)
+        print('apres', len(dico_ref))
+        
         self.knnData, self.value = normalize(dico_ref, data_test)
         self.k = k
         #print(self.knnData)
@@ -39,7 +50,6 @@ class KNN() :
     def identification(self):
         print("identification du matériau")
         nbr = {}
-        print(f'liste_vois : {self.liste_vois}')
         for elt in self.liste_vois:
             if elt in nbr:
                 nbr[elt] += 1

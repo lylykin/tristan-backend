@@ -15,7 +15,7 @@ from knn import KNN
 #    tour += 1
 #materiau = ['A', 'B', 'A', 'C', 'C', 'A', 'B', 'B', 'C', 'C']  
 
-def accuracy(liste_donnees, materiau, k):
+def accuracy(liste_donnees, materiau, k, reduce):
 
     dic = {}
     for i in range (10):
@@ -23,8 +23,6 @@ def accuracy(liste_donnees, materiau, k):
 
     # === Split 80/20 ===
     X_train, X_test, y_train, y_test = train_test_split(liste_donnees, materiau, test_size=0.2, random_state=len(materiau)//4)
-    print(X_test, y_test)
-    print(X_train, y_train)
 
     dic2 = {}
     for i in range(len(X_train)):
@@ -32,7 +30,7 @@ def accuracy(liste_donnees, materiau, k):
 
     y_pred = []
     for test_liste in X_test :
-        knn = KNN(data_test=test_liste, dico_ref=dic2, k=k)
+        knn = KNN(data_test=test_liste, dico_ref=dic2, k=k, reduce=reduce)
         y_pred.append(knn.knn())
 
     correct = 0
@@ -46,10 +44,10 @@ def accuracy(liste_donnees, materiau, k):
 
     return accuracy
 
-def find_best_k(liste_donnees, materiau):
+def find_best_k(liste_donnees, materiau, reduce):
     maxi = (- math.inf, 0)
     for k in [2, 3, 5, 7, 11, 13, 17, 19, 23]:
-        acc = accuracy(liste_donnees, materiau, k)
+        acc = accuracy(liste_donnees, materiau, k, reduce)
         if acc > maxi[0]:
             maxi = (acc, k)
     print(maxi)
