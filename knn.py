@@ -9,9 +9,11 @@ class KNN() :
 
     def __init__(self, data_test : list, dico_ref : dict) : 
         self.knnData, self.value = normalize(dico_ref, data_test)
+        #print(self.knnData)
+        #print(self.value)
 
     def knn(self) :        
-        self.liste_vois  = self.plus_proche_voisins()
+        self.liste_vois = self.plus_proche_voisins()
         return self.identification()
 
     def plus_proche_voisins(self, k : int = 7):
@@ -60,16 +62,16 @@ def euclidienne(list_a : list, list_b : list):
     return sqrt(sum_dist)
 
 
-def normalize(data_dico : dict, data_list) :
+def normalize(data_dico : dict, data_list : list) :
     
     "normalise les data passées en paramètre, pour que toutes les dimensions soient entre 0 et 1"
     
     norma_dict = {}
     norma_list = []
-    max_vals=[0 for _ in range (len(data_dico.keys()))]
+    max_vals=[0 for _ in range (len(list(data_dico.keys())[0]))]
     
     #on parcoure les lettres une à une, pour rechercher le plus grand.
-    for i in range(len(data_dico.keys())) : 
+    for i in range(len(list(data_dico.keys())[0])) : 
                 
         for spark_data in data_dico.keys():
              #recherche de la plus grande valeur pour la lettre correspondante
@@ -85,12 +87,17 @@ def normalize(data_dico : dict, data_list) :
         vals = []
         
         #les deux ont forcément la même taille et les données dans le même sens.
-        for val in len(spark_data) : 
+        for val in range(len(spark_data)) : 
             vals.append(spark_data[val]/max_vals[val])
-            norma_list.append(data_list[val]/max_vals[i])
+            
+        vals = tuple(vals)
+        norma_dict[vals] = data_dico[spark_data]
+            
+    for i in range(len(max_vals)) : 
+        norma_list.append(data_list[i]/max_vals[i])
             
         #dico avec les valeurs normalisées.
-        norma_dict[vals] = data_dico[spark_data]
+
         
     return (norma_dict, norma_list)
 
@@ -110,10 +117,10 @@ fruits = {
     (7, 6): 'pomme',
     (8, 4): 'pomme'}
 
-#A = KNN((1,3))
+#A = KNN((1,3), fruits)
 #for val in fruits.items():
 #    A.addKnnData(val[0], val[1])
 #
-#print(A.knn(k=2))
+#print(A.knn())
 
 

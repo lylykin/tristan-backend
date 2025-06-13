@@ -112,7 +112,7 @@ class TTNDataHandler:
             
             
         else :
-            self._add_gps_data(dico_payload)   
+            self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))  
         #except :
             print('bouhouhouuu')
             pass 
@@ -140,6 +140,7 @@ class TTNDataHandler:
                     for i in range(len(data_values))}
         data_dict['borne'] = borne_input
         data_dict['material'] = mat
+        #data_dict['objet'] = self.objet
 
         print(data_dict)
         self.client.collection("sparkfun").create(data_dict)
@@ -271,5 +272,3 @@ class TTNDataHandler:
 #print(obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  )
 ##obj._add_sparkfun_data_s1( ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T','U', 'V', 'W'], [0 for i in range (18)])  
     
-
-
