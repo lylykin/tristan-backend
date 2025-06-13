@@ -15,7 +15,7 @@ from knn import KNN
 #    tour += 1
 #materiau = ['A', 'B', 'A', 'C', 'C', 'A', 'B', 'B', 'C', 'C']  
 
-def accuracy(liste_donnees, materiau):
+def accuracy(liste_donnees, materiau, k):
 
     dic = {}
     for i in range (10):
@@ -32,7 +32,7 @@ def accuracy(liste_donnees, materiau):
 
     y_pred = []
     for test_liste in X_test :
-        knn = KNN(data_test=test_liste, dico_ref=dic2)
+        knn = KNN(data_test=test_liste, dico_ref=dic2, k=k)
         y_pred.append(knn.knn())
 
     correct = 0
@@ -45,3 +45,12 @@ def accuracy(liste_donnees, materiau):
     print(f"Précision (80/20) : {accuracy:.2%}")
 
     return accuracy
+
+def find_best_k(liste_donnees, materiau):
+    maxi = (- math.inf, 0)
+    for k in [2, 3, 5, 7, 11, 13, 17, 19, 23]:
+        acc = accuracy(liste_donnees, materiau, k)
+        if acc > maxi[0]:
+            maxi = (acc, k)
+    print(maxi)
+    return maxi
