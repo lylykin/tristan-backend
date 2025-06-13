@@ -263,7 +263,7 @@ class TTNDataHandler:
                         sparkfun_data['target'].append(i)
                     i += 1
 
-        pca.pca(sparkfun_data)
+        pca.pca3D(sparkfun_data)
 
 
 

@@ -9,10 +9,43 @@ from sklearn.decomposition import PCA
 #            'target':[0, 1, 2, 0],
 #            'target_names':['alu', 'carton', 'papier']}
 
-def pca(sparkfun):
+def pca2D(sparkfun):
 
     fig = plt.figure()
-    ax = fig.add_subplot(projection="3d")
+    ax = fig.add_subplot(111)
+
+    X_reduced = PCA(n_components=2).fit_transform(sparkfun['data'])
+    scatter = ax.scatter(
+        X_reduced[:, 0],
+        X_reduced[:, 1],
+        c=sparkfun['target'],
+        s=5,
+        cmap = 'nipy_spectral'
+    )
+
+    ax.set(
+        title="First two PCA dimensions",
+        xlabel="x",
+        ylabel="y",
+    )
+    ax.xaxis.set_ticklabels([])
+    ax.yaxis.set_ticklabels([])
+
+    # Add a legend
+    legend1 = ax.legend(
+        scatter.legend_elements()[0],
+        sparkfun['target_names'],
+        loc="center right",
+        title="Classes"
+    )
+    ax.add_artist(legend1)
+
+    plt.show()
+
+def pca3D(sparkfun):
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection="3d")
 
     X_reduced = PCA(n_components=3).fit_transform(sparkfun['data'])
     scatter = ax.scatter(
@@ -21,7 +54,7 @@ def pca(sparkfun):
         X_reduced[:, 2],
         c=sparkfun['target'],
         s=5,
-        cmap = 'Accent'
+        cmap = 'nipy_spectral'
     )
 
     ax.set(
@@ -38,8 +71,9 @@ def pca(sparkfun):
     legend1 = ax.legend(
         scatter.legend_elements()[0],
         sparkfun['target_names'],
-        loc="upper right",
+        loc="center right",
         title="Classes",
+        bbox_to_anchor=(1, 0.5)
     )
     ax.add_artist(legend1)
 
