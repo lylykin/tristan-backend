@@ -187,8 +187,8 @@ class TTNDataHandler:
         #récupération des records en brut des données de la table sparkfun
         print('récupération des données dans la db\n')
         self.spark_data = self.client.collection("sparkfun").get_full_list(100,
-         {'expand': 'material', filter : 'objet=""'})
-
+         {'expand': 'material', filter : "objet=''"})
+        print(len(self.spark_data))
         #formattage des données materials
         print('formattage des données en cours')
         pb_data = {}
