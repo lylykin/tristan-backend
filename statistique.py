@@ -30,7 +30,7 @@ def accuracy(liste_donnees, materiau, k, reduce):
 
     y_pred = []
     for test_liste in X_test :
-        knn = KNN(data_test=test_liste, dico_ref=dic2, k=k, reduce=reduce)
+        knn = KNN(data_test=test_liste, dico_ref=dic2, k=k, reduce=reduce, weighted=True)
         y_pred.append(knn.knn())
 
     correct = 0

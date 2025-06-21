@@ -8,7 +8,7 @@ class KNN() :
     dico_ref : dict
     k : int
 
-    def __init__(self, data_test : list, dico_ref : dict, k : int = 7, reduce : bool = False, weighted = None) : 
+    def __init__(self, data_test : list, dico_ref : dict, k : int = 7, reduce : bool = False, weighted = None, normalize = False) : 
         print('avant', len(dico_ref))
         
         if reduce:
@@ -24,8 +24,12 @@ class KNN() :
                     
         print('apres', len(dico_ref))
         
+        if normalize : 
+            self.knnData, self.value = normalize(dico_ref, data_test)
+        else : 
+            self.knnData, self.value = dico_ref, data_test
+            
         self.weighted = weighted
-        self.knnData, self.value = normalize(dico_ref, data_test)
         self.k = k
         #print(self.knnData)
         #print(self.value)
@@ -143,7 +147,7 @@ def normalize(data_dico : dict, data_list : list) :
             if spark_data[i] >max_vals[i] :
                 max_vals[i] = spark_data[i]
         
-        if data_list[i]>max_vals[i]: 
+        if data_list[i]>max_vals[i]: #FIXME error list index out of range for data list
             max_vals[i] = data_list[i]
             
     #normalisation des datas dans la db
