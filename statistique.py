@@ -18,7 +18,7 @@ from knn import KNN
 def accuracy(liste_donnees, materiau, k, reduce):
 
     dic = {}
-    for i in range (10):
+    for i in range (len(liste_donnees)):
         dic[tuple(liste_donnees[i])] = materiau[i]
 
     # === Split 80/20 ===
@@ -46,7 +46,7 @@ def accuracy(liste_donnees, materiau, k, reduce):
 
 def find_best_k(liste_donnees, materiau, reduce):
     maxi = (- math.inf, 0)
-    for k in [2, 3, 5, 7, 11, 13, 17, 19, 23]:
+    for k in [3, 5, 7, 11, 13, 17, 19, 23]:
         acc = accuracy(liste_donnees, materiau, k, reduce)
         if acc > maxi[0]:
             maxi = (acc, k)

@@ -278,15 +278,15 @@ class TTNDataHandler:
         materiau = []
 
         for mat in self.client.collection('sparkfun').get_full_list(100, {filter : f"objet=''"}):
-            if mat.objet != '': #marche pas
-                liste_donnees.append([mat.a,mat.b, mat.c, mat.d, mat.e, mat.f, mat.g, mat.h, mat.i, mat.j, mat.k, mat.r, mat.s, mat.t, mat.u, mat.v, mat.w])
-                materiau.append(mat.material)
+            #if mat.objet != '': #marche pas
+            liste_donnees.append([mat.a,mat.b, mat.c, mat.d, mat.e, mat.f, mat.g, mat.h, mat.i, mat.j, mat.k, mat.r, mat.s, mat.t, mat.u, mat.v, mat.w])
+            materiau.append(mat.material)
 
         l = len(liste_donnees)#met l = 6
 
         #stati.find_best_k(liste_donnees, materiau) # knn meilleur k = 7 avec 48,5 de réussite
         stati.find_best_k(liste_donnees, materiau, True) #knn meilleur k = 3 avec 70,8 de réussite avec le filter direct ds statistique 
-                                                         #là ne marche pas
+                                                         #knn meilleur k = 3 avec 42,8 de réussite pareil pour le filter
 
 
 
