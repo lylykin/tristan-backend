@@ -47,8 +47,10 @@ def accuracy(liste_donnees, materiau, k, reduce):
 def find_best_k(liste_donnees, materiau, reduce):
     maxi = (- math.inf, 0)
     for k in [3, 5, 7, 11, 13, 17, 19, 23]:
-        acc = accuracy(liste_donnees, materiau, k, reduce)
-        if acc > maxi[0]:
-            maxi = (acc, k)
+        if k < len(liste_donnees):
+            acc = accuracy(liste_donnees, materiau, k, reduce)
+            if acc > maxi[0]:
+                maxi = (acc, k)
     print(maxi)
+    print(f"Meilleur précision (80/20) : {maxi[0]:.2%}, avec un k = {maxi[1]}")
     return maxi
