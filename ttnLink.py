@@ -126,12 +126,8 @@ class TTNDataHandler:
         """
         # On demande les informations lors du remplissage de la bdd
         self.add_material_if_needed(mat)
-        
-        #je le passe en attribut pour faciliter l'appel de l'une de tes fonctions
-        #au futur : doit être récup de la table objet?? marche pas si reste coté serveur
-        self.objet = str(input("saisir l'objet associé au déchet : "))
+
         borne_input = "tristan1" # On suppose que la borne utilisée sera la seule existante
-        #objet_id = self.add_object(objet_input, user_id_input)
         
         print("Phase 2 : Insertion en cours...")
         
@@ -140,10 +136,6 @@ class TTNDataHandler:
         
         data_dict['borne'] = borne_input
         data_dict['material'] = mat
-        
-        #récupération de l'id de l'objet
-        obj_record = self.client.collection('objet').get_first_list_item(filter = f"nom_objet='{self.objet}'")
-        data_dict['objet'] = obj_record.id
 
         print(data_dict)
         self.client.collection("sparkfun").create(data_dict)
@@ -245,10 +237,10 @@ class TTNDataHandler:
         #récupération des infos sur les matériaux et leur recyclabilité :
         if nom_mat != 'trash' : 
             
-            mat = self.client.collection("materiau").get_first_list_item(filter= f"id='{nom_mat}'")
+            mat = self.client.collection("materiau").get_one(id = nom_mat)
             return mat.recyclabilite
         
-        else : 
+        else :  
             return "Erreur : mesure incorrecte, refaites votre donnée"
     
     def pca(self):
