@@ -85,6 +85,7 @@ class TTNDataHandler:
 
     
     def _add_gps_data(self, data_keys : list, data_values : list):
+        #TODO : éventuemment à debug car a pas l'air de fonctionner
         self.client.collection("borne").update(
             {
                 'lat_actuel'  : data_values[1], # lat
@@ -97,23 +98,21 @@ class TTNDataHandler:
         message = json.loads(msg.payload.decode())
         
         #le try except sert à la gestion des erreurs.
-        #try : 
-        
-        dico_payload = message['uplink_message']['decoded_payload']
-        print(dico_payload)
-        
-        if list(dico_payload.keys())[0] == 'A' : 
-            print('test bon : le message est correctement formaté')
-            mat, recyclable = self._spark_knn(dico_payload)
-            self._add_sparkfun_data_s2(list(dico_payload.keys()), list(dico_payload.values()), mat)
-            #self.update_knn_found_material(mat)
-            return(mat, recyclable)
+        try : 
+            dico_payload = message['uplink_message']['decoded_payload']
+            dico_payload = msg
+
+            if list(dico_payload.keys())[0] == 'A' : 
+                print('test bon : le message est correctement formaté')
+                mat, recyclable = self._spark_knn(dico_payload)
+                self._add_sparkfun_data_s2(list(dico_payload.keys()), list(dico_payload.values()), mat)
+                #self.update_knn_found_material(mat)
+                return(mat, recyclable)
             
-            
-        else :
-            self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))  
-        #except :
-            print('bouhouhouuu')
+            else :
+                self._add_gps_data(list(dico_payload.keys()), list(dico_payload.values()))  
+                
+        except :
             pass 
         
         
@@ -180,7 +179,7 @@ class TTNDataHandler:
         print('récupération des données dans la db\n')
         self.spark_data = self.client.collection("sparkfun").get_full_list(100,
          {'expand': 'material', filter : "objet=''"})
-        print(len(self.spark_data))
+        #print(len(self.spark_data))
         #formattage des données materials
         print('formattage des données en cours')
         pb_data = {}
@@ -215,7 +214,7 @@ class TTNDataHandler:
             #formattage pour knn
             pb_data[materials_data[index]] = mat.material
             index += 1
-        print(f'pb_data : {pb_data}')
+        #print(f'pb_data : {pb_data}')
         print('formattage fini')
 
                 
@@ -283,7 +282,14 @@ class TTNDataHandler:
 
 
         
-#obj = TTNDataHandler()
+obj = TTNDataHandler()
+
+
+
+dico_payload = [['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L' ,'R', 'S', 'T','U', 'V', 'W'], [0 for i in range (18)]]
+dico_payload = {dico_payload[0][i] : dico_payload[1][i] for i in range(len(dico_payload[0]))}
+
+mat, recyclable = obj._spark_knn(dico_payload)
+obj._add_sparkfun_data_s2(list(dico_payload.keys()), list(dico_payload.values()), mat)
 #print(obj._spark_knn({'A' : 0, 'B' : 0, 'C' : 0, 'D' : 0, 'E' : 0, 'F' : 0, 'G' : 0, 'H' : 0, 'I' : 0, 'J' : 0, 'K' : 0, 'L' : 0, 'R' : 0, 'S' : 0, 'T' : 0, 'U' : 0, 'V' : 0, 'W ': 0})  )
-#obj._add_sparkfun_data_s1( ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'R', 'S', 'T','U', 'V', 'W'], [0 for i in range (18)])  
     

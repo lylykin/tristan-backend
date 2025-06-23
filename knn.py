@@ -9,7 +9,6 @@ class KNN() :
     k : int
 
     def __init__(self, data_test : list, dico_ref : dict, k : int = 7, reduce : bool = False, weighted = None, normalize = False) : 
-        print('avant', len(dico_ref))
         
         if reduce:
             #condition le materiel a tester doit etre parmi mat_a_mettre
@@ -21,8 +20,6 @@ class KNN() :
                 if mat not in mat_a_mettre:
                     print('------------------------------------------------------------------------')
                     dico_ref.pop(liste)
-                    
-        print('apres', len(dico_ref))
         
         if normalize : 
             self.knnData, self.value = normalize(dico_ref, data_test)
@@ -43,7 +40,6 @@ class KNN() :
             return self.identification()
         return self.weighted_identification()
         
-        self.dist_weight()
         #puis modifier identification pour prendre en compte le poids        
         
     def plus_proche_voisins(self):
